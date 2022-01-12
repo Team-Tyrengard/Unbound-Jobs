@@ -1,0 +1,144 @@
+# Basic job information
+info:
+  # Will appear in most GUIs. Will also serve as a server-unique job id (in a lowercase form, with spaces replaced as hyphens).
+  # Used as command variables (e.g. /jobs join <job-name>). Colors NOT accepted, but spaces are accepted.
+  name: Sample Job
+
+  # Used to represent the job in GUIs
+  icon: barrier
+
+  # Will appear in most GUIs, under the job name. Colors accepted.
+  short-description: Sample short description
+
+  # OPTIONAL: Will appear in the job list GUI, under the job name. Colors accepted.
+  # default: value of short-description
+  full-description:
+    - Sample full description
+    - With line breaks
+
+  pay-cap:
+    type: per_player
+    amount: <pay_cap_amount>
+
+  # XP decay is designed to balance the job level across players,
+  # depending on whether they actively do tasks for the job or not.
+  # XP decay happens per decay cycle, which can be set in the config.
+  #
+  # A quota is set for each job for each player, depending on the player level.
+  # It follows the formula: xp_decay_quota = base_quota + (player_job_level * level_quota)
+  #
+  # If a player does NOT meet the decay quota for a job during a decay cycle,
+  # the player's XP for that job will decay, following the formula below:
+  # xp_after_decay = current_xp - (base_rate + (player_job_level * level_rate))
+  #
+  # If you want to turn off XP decay for a job, set all values below to 0.
+  xp-decay:
+    base-rate: <exp_value>
+    level-rate: <exp_value>
+    base-quota: <exp_value>
+    level-quota: <exp_value>
+
+# OPTIONAL: Quests
+quests:
+  # Quest ID, unique to the job. Must not contain any spaces.
+  quest-id:
+    # Title of the quest, appears in GUIs and in chat. Colors accepted.
+    title: Gather 50 buckets of milk
+
+    # Type of quest.
+    # Allowed values are: daily, weekly
+    type: daily
+
+    # OPTIONAL: Weight of the quest when rolled.
+    # Higher values will mean that this quest will be given more often than lower-weighted ones.
+    # default: 1
+    weight: 1
+
+    # OPTIONAL: Defines the minimum job level of players that this quest will be given to.
+    # default: 0
+    min-level: 0
+
+    # OPTIONAL: Defines the maximum job level of players that this quest will be given to.
+    # default: 32767
+    max-level: 32767
+
+    # OPTIONAL: The completion type of the given task list. Allowed values:
+    #   any - completing ANY ONE of the tasks will complete the quest
+    #   all - completing ALL tasks will complete the quest
+    # default: all
+    task-list-type: any
+
+    # The list of tasks required to complete the quest, written in the form:
+    #     <task type> [<material|mob type>] <amount>
+    #
+    # Refer to the supported task types below.
+    tasks:
+      - gather_animal milk 50
+
+    # Rewards list, written in the form:
+    #     <reward type> <arguments>
+    #
+    # Supported rewards are:
+    #   exp <amount>                      - gives job experience for this job
+    #   pay <amount>                      - gives money
+    #   command <command with arguments>  - runs a command ("@player" will be substituted with the player's name, no slashes)
+    rewards:
+      - exp 50
+      - command xp add @player 1000 points
+
+# skills must be located in skills folder
+# skill names are case-sensitive
+skills:
+  - <required level to unlock> Skill 1
+  - <required level to unlock> Skill 2
+
+# The list of tasks for the current job.
+tasks:
+  # Tasks can be written in a short form:
+  #     <task type> [<material|mob type>] <base pay> <base exp>
+  # <base pay> must be a number (decimals allowed)
+  # <base exp> must be a number (decimals NOT allowed)
+  #
+  # Base supported task types are:
+  #     break_block, breed_animal, brew_potion, catch_fish, craft_item, gather_animal,
+  #     harvest_block, kill_mob, place_block, repair_item, smelt_item, sow_plant
+  #
+  # NOTE: Custom tasks can be declared by other plugins that extend Unbound Jobs.
+  #       Refer to their documentation to find their tasks and task arguments.
+  - kill_mob [skeleton, zombie, witch] 99.99 50
+
+  # If more customization is needed, the task list can also accept an expanded form.
+  - task: break_block
+    # Same as <base pay> above.
+    base-pay: 10
+
+    # Same as <base exp> above.
+    base-exp: 5
+
+    # Beyond this level, doing this task will not give any job experience
+    # default: 32767
+    xp-level-cap: 25
+
+    # Beyond this level, doing this task will not give any pay
+    # default: 32767
+    pay-level-cap: 25
+
+    # An array of materials, mob types, or potion types this specific task will accept.
+    # All materials or mob types accepted in the expanded form are also accepted in the short form.
+    # Refer to the following links to see the accepted materials, mob types, and potion types:
+    #     https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html (except "air" and non-survival items)
+    #     https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/entity/EntityType.html (only mobs are supported)
+    #     https://hub.spigotmc.org/javadocs/spigot/org/bukkit/potion/PotionType.html (only for brew_potion tasks)
+    #
+    # WARNING: No two same task types can have the same material or mob type. This also applies to those in short form.
+    accepts:
+      - dirt
+      - redstone_ore
+
+      # Adding a single asterisk to the end of the item will substitute for ALL colors of that item.
+      # Other allowed values are:
+      #       shulker_box, bed, banner, candle, carpet, concrete, concrete_powder, dye
+      #       stained_glass, stained_glass_pane, tulip, terracotta, glazed_terracotta, mushroom
+      #
+      # NOTE: These are also allowed in the short form.
+      - wool*

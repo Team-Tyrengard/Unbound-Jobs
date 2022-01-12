@@ -1,0 +1,75 @@
+# General config options
+general:
+  # List of worlds where job tasks earn money and job quests can be completed. Use world names (case-sensitive).
+  worlds-allowed:
+    - world
+
+# OPTIONAL: Config options for commands
+commands:
+  # OPTIONAL: Config for job list GUI ("/jobs list")
+  job-list:
+    # OPTIONAL: Enable/disable players bringing up the job list GUI.
+    # default: true
+    enabled: true
+
+    # OPTIONAL: Enable/disable players joining jobs through the "/jobs list" GUI.
+    # default: true
+    join-jobs: true
+
+# Config options for players
+workers:
+  # Enable/disable players bringing up the job list GUI.
+  job-list-gui-enabled: true
+
+  # Enable/disable players joining jobs through the "/jobs list" GUI.
+  join-jobs-via-list-gui: true
+
+  # Enable/disable players viewing the job profile of others using the "/jobs profile <player-name>" command.
+  public-profiles: true
+
+  # Weekly job quest reroll day.
+  # Allowed values: sunday, monday, tuesday, wednesday, thursday, friday, saturday
+  weekly-quest-reroll-day: sunday
+
+# Config options for jobs
+jobs:
+  # OPTIONAL: List of disabled jobs. Add job names in kebab-case.
+  # Useful for when you want to disable jobs without moving/deleting their config files.
+  # Uncomment to use.
+  #disabled-jobs:
+  #  - job-name-in-kebab-case
+
+  # Supported values: 1-32767
+  max-level: 100
+
+  # Set a job limit for every player. Set to -1 to disable limit.
+  limit-per-player: -1
+
+  experience:
+    # Enable/disable experience boosts.
+    # Active timed boosts will be paused.
+    boosts-enabled: true
+
+    # Formula to use for computing experience. Result is rounded because experience is an integer value.
+    # Allowed variables:
+    # t - target level
+    formula: ((t - 1) / 0.5) ^ 1.75
+
+  income:
+    # Enable/disable income boosts.
+    # Active timed boosts will be paused.
+    boosts-enabled: true
+
+    # Specifies when players get paid for the tasks they complete in their jobs.
+    # Allowed values:
+    #   per_day   - per in-game day, income will appear in chat
+    #   per_task  - upon completion of task
+    payment-period: per_task
+
+    # Formula to use for computing income from tasks.
+    # Allowed variables:
+    # M - max job level
+    # p - base pay
+    # j - current job level
+    formula: p * ((1 + ((j - 1) / M)) ^ 1.59650776)
+

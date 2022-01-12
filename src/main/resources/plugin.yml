@@ -1,0 +1,36 @@
+name: UnboundJobs
+version: 0.2
+main: com.tyrengard.unbound.jobs.UnboundJobs
+api-version: 1.18
+prefix: UnboundJobs
+depend: [ Aureycore, Vault ]
+authors: [ hayachikin ]
+description: Job system for the Unbound plugin pack for Havengarde
+website: unbound.tyrengard.com
+usage: &usage "\u00A7cWrong syntax. Use /<command> help to show proper usage."
+permission-message: &noperms "\u00A7cYou do not have permission to use this command."
+
+commands:
+  unbound-jobs-admin:
+    description: Admin-only commands for the Unbound Jobs plugin
+    usage: *usage
+    aliases: [ujadmin]
+    permission: unbound.jobs.admin
+    permission-message: *noperms
+  unbound-jobs:
+    description: General commands for the Unbound Jobs plugin
+    usage: *usage
+    aliases: [uj, jobs]
+permissions:
+  unbound.jobs.all:
+    description: All Unbound Jobs permissions
+    default: false
+    children:
+      unbound.jobs.admin: true
+      unbound.jobs.join: true
+  unbound.jobs.admin:
+    description: Allows you to access admin-only commands for Unbound Jobs
+    default: op
+  unbound.jobs.join:
+    description: Allows a player to join a job via the command /jobs join <job-name>
+    default: true
