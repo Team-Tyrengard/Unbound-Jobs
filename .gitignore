@@ -7,7 +7,6 @@
 
 # REMOVE WHOLE .idea folder and .iml
 .idea
-*.iml
 
 # User-specific stuff
 .idea/**/workspace.xml
