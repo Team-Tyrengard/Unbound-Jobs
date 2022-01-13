@@ -86,11 +86,11 @@ quests:
       - exp 50
       - command xp add @player 1000 points
 
-# skills must be located in skills folder
-# skill names are case-sensitive
-skills:
-  - <required level to unlock> Skill 1
-  - <required level to unlock> Skill 2
+# Boons are passive bonuses that are awarded to players for reaching certain levels.
+#
+boons:
+  - <required level to unlock> Boon 1
+  - <required level to unlock> Boon 2
 
 # The list of tasks for the current job.
 tasks:

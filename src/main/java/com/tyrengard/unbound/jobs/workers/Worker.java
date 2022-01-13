@@ -9,6 +9,9 @@ import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
 import dev.morphia.annotations.AlsoLoad;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -24,31 +27,28 @@ public final class Worker {
     private HashMap<String, JobData> jobData;
     private HashMap<String, JobQuestData> jobQuestData;
 
-    private int dailyQuestSlots, weeklyQuestSlots;
     private LocalDate lastQuestRefreshDate;
 
     private BossBarExpIndicatorSetting bossBarExpIndicatorSetting;
 
-    public Worker(UUID id, int dailyQuestSlots, int weeklyQuestSlots) {
-        this(id, new HashMap<>(), new HashMap<>(),
-                dailyQuestSlots, weeklyQuestSlots, BossBarExpIndicatorSetting.DEFAULT);
+    public Worker(UUID id) {
+        this(id, new HashMap<>(), new HashMap<>(), BossBarExpIndicatorSetting.DEFAULT);
     }
 
     public Worker(UUID id, HashMap<String, JobData> jobData,
                   HashMap<String, JobQuestData> jobQuestData,
-                  int dailyQuestSlots, int weeklyQuestSlots,
                   BossBarExpIndicatorSetting bossBarExpIndicatorSetting) {
         this.id = id;
         this.jobData = jobData;
         this.jobQuestData = jobQuestData;
-        this.dailyQuestSlots = dailyQuestSlots;
-        this.weeklyQuestSlots = weeklyQuestSlots;
         this.bossBarExpIndicatorSetting = bossBarExpIndicatorSetting;
     }
 
     public UUID getId() {
         return id;
     }
+
+    public String getPlayerName() { return Bukkit.getOfflinePlayer(id).getName(); }
 
     private HashMap<String, JobData> getJobDataMap() {
         if (jobData == null)
@@ -76,26 +76,28 @@ public final class Worker {
         getJobDataMap().remove(j.getId());
     }
 
-    private HashMap<String, JobQuestData> getJobQuestData() {
+    private @NotNull HashMap<String, JobQuestData> getJobQuestData() {
         if (jobQuestData == null)
             jobQuestData = new HashMap<>();
         return jobQuestData;
     }
 
-    public JobQuestData getJobQuestData(Job j) {
+    public @NotNull JobQuestData getJobQuestData(Job j) {
         return getJobQuestData().computeIfAbsent(j.getId(), jobId -> new JobQuestData());
     }
 
-    public void setDailyJobQuest(JobQuest jobQuest, int slot) {
-        String jobId = jobQuest.getJob().getId();
-        if (getJobQuestData().containsKey(jobId))
-            getJobQuestData().computeIfAbsent(jobId, unused -> new JobQuestData()).setDailyQuest(jobQuest, slot);
+    public void setDailyJobQuest(@NotNull Job job, int slot, @Nullable JobQuest jobQuest) {
+        String jobId = job.getId();
+        JobQuestData jobQuestData = getJobQuestData().get(jobId);
+        if (jobQuestData != null)
+            jobQuestData.setDailyQuest(jobQuest, slot);
     }
 
-    public void setWeeklyJobQuest(JobQuest jobQuest, int slot) {
-        String jobId = jobQuest.getJob().getId();
-        if (getJobQuestData().containsKey(jobId))
-            getJobQuestData().computeIfAbsent(jobId, id -> new JobQuestData()).setWeeklyQuest(jobQuest, slot);
+    public void setWeeklyJobQuest(@NotNull Job job, int slot, @Nullable JobQuest jobQuest) {
+        String jobId = job.getId();
+        JobQuestData jobQuestData = getJobQuestData().get(jobId);
+        if (jobQuestData != null)
+            jobQuestData.setWeeklyQuest(jobQuest, slot);
     }
 
     public LocalDate getLastQuestRefreshDate() {
@@ -104,22 +106,6 @@ public final class Worker {
 
     public void setLastQuestRefreshDate(LocalDate lastQuestRefreshDate) {
         this.lastQuestRefreshDate = lastQuestRefreshDate;
-    }
-
-    public int getDailyQuestSlots() {
-        return dailyQuestSlots;
-    }
-
-    public void setDailyQuestSlots(int dailyQuestSlots) {
-        this.dailyQuestSlots = dailyQuestSlots;
-    }
-
-    public int getWeeklyQuestSlots() {
-        return weeklyQuestSlots;
-    }
-
-    public void setWeeklyQuestSlots(int weeklyQuestSlots) {
-        this.weeklyQuestSlots = weeklyQuestSlots;
     }
 
     public BossBarExpIndicatorSetting getBossBarExpIndicatorSetting() {

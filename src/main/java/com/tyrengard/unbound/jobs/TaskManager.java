@@ -42,6 +42,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class TaskManager extends AManager<UnboundJobs> implements Listener, Configured {
@@ -228,9 +229,11 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         List<JobQuestTask> jobQuestTasks = new ArrayList<>();
         for (Job job : jobs) {
             jobQuestTasks.addAll(worker.getJobQuestData(job).getAllInstances().stream()
+                    .filter(Objects::nonNull)
                     .filter(JobQuestInstance::isActive)
                     .map(JobQuestInstance::getQuestId)
                     .map(job::getJobQuest)
+                    .filter(Objects::nonNull)
                     .flatMap(jobQuest -> jobQuest.getTasks().stream())
                     .collect(Collectors.toList()));
         }

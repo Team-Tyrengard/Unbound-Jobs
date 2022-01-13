@@ -6,27 +6,39 @@ import com.tyrengard.aureycore.foundation.AManager;
 import com.tyrengard.aureycore.foundation.Configured;
 import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.enums.PaymentPeriod;
+import com.tyrengard.unbound.jobs.events.JobQuestTaskPerformEvent;
 import com.tyrengard.unbound.jobs.events.JobTaskPerformEvent;
+import com.tyrengard.unbound.jobs.exceptions.UnboundJobsException;
+import com.tyrengard.unbound.jobs.quests.JobQuestReward;
+import com.tyrengard.unbound.jobs.quests.JobQuestRewardType;
+import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
+import com.tyrengard.unbound.jobs.quests.internal.JobQuestInstance;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
+import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.JobTask;
 import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collection;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 public final class JobManager extends AManager<UnboundJobs> implements Listener, Configured {
     private final TreeMap<String, Job> jobs = new TreeMap<>();
+    private final HashMap<String, JobQuestRewardType> jobQuestRewardTypes;
     private final File pluginDataFolder;
 
     // region Config values
@@ -46,6 +58,7 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
         instance = this;
 
         pluginDataFolder = plugin.getDataFolder();
+        jobQuestRewardTypes = new HashMap<>();
     }
 
     public static int getExperienceForNextLevel(int currentLevel) {
@@ -55,6 +68,14 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
     // region Manager overrides
     @Override
     protected void startup() {
+        for (JobQuestRewardType type : JobQuestRewardType.Default.values()) {
+            try {
+                registerJobQuestReward(type);
+            } catch (UnboundJobsException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (!pluginDataFolder.exists())
             logError("Plugin data folder not found! No jobs will be added.");
 
@@ -172,6 +193,18 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
         return instance.maxJobsPerPlayer;
     }
 
+    public static void registerJobQuestReward(@NotNull JobQuestRewardType jobQuestRewardType) throws UnboundJobsException {
+        String jobQuestRewardId = jobQuestRewardType.getId();
+        if (instance.jobQuestRewardTypes.containsKey(jobQuestRewardId))
+            throw new UnboundJobsException("The job quest reward id \"" + jobQuestRewardId + "\" already exists.");
+        else
+            instance.jobQuestRewardTypes.put(jobQuestRewardId, jobQuestRewardType);
+    }
+
+    public static @Nullable JobQuestRewardType getJobQuestRewardType(String id) {
+        return instance.jobQuestRewardTypes.get(id);
+    }
+
     // region Event handlers
     @EventHandler
     private void onJobTaskPerform(JobTaskPerformEvent e) {
@@ -193,6 +226,36 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
             WorkerManager.payWorker(w, eval.evaluate(incomeFormula, variables));
         }
         // endregion
+    }
+
+    @EventHandler
+    private void onJobQuestTaskPerform(JobQuestTaskPerformEvent e) throws UnboundJobsException {
+        Worker w = e.getWorker();
+        JobQuestTask t = e.getTask();
+        JobQuest jq = t.getSource();
+        Job j = jq.getJob();
+
+        JobQuestData jobQuestData = w.getJobQuestData(j);
+        JobQuestInstance jobQuestInstance = jobQuestData.getInstance(jq);
+        if (jobQuestInstance == null)
+            throw new UnboundJobsException("Invalid job quest data for player " + w.getPlayerName());
+
+        if (!jobQuestInstance.isActive())
+            return;
+
+        int taskId = t.getId();
+        int newProgress = jobQuestInstance.getProgress(taskId) + 1, progressRequired = t.getProgressRequired();
+        if (newProgress <= progressRequired) {
+            jobQuestInstance.setProgress(taskId, newProgress);
+            if (newProgress == progressRequired) {
+                Player p = Objects.requireNonNull(Bukkit.getPlayer(w.getId()));
+                for (JobQuestReward reward : jq.getRewards())
+                    reward.awardToPlayer(p);
+                jobQuestInstance.setActive(false);
+                p.sendMessage("Quest " + ChatColor.YELLOW + jq.getTitle() +
+                        ChatColor.WHITE + " completed! Rewards have been awarded.");
+            }
+        }
     }
     // endregion
 }

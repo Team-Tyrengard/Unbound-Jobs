@@ -1,7 +1,7 @@
 package com.tyrengard.unbound.jobs.quests.internal;
 
 import com.tyrengard.unbound.jobs.Job;
-import com.tyrengard.unbound.jobs.QuestManager;
+import com.tyrengard.unbound.jobs.JobManager;
 import com.tyrengard.unbound.jobs.TaskManager;
 import com.tyrengard.unbound.jobs.actions.Action;
 import com.tyrengard.unbound.jobs.quests.JobQuestReward;
@@ -10,6 +10,7 @@ import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.TaskSource;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,7 +28,7 @@ public class JobQuest implements TaskSource {
     private final TreeMap<Integer, JobQuestTask> tasks;
     private final HashSet<JobQuestReward> rewards;
 
-    public JobQuest(Job job, String id, ConfigurationSection questSection) throws InvalidConfigurationException {
+    public JobQuest(@NotNull Job job, @NotNull String id, @NotNull ConfigurationSection questSection) throws InvalidConfigurationException {
         this.job = job;
         this.id = id;
 
@@ -80,7 +81,7 @@ public class JobQuest implements TaskSource {
             throw configException("has no rewards");
         for (String line : rewardLines) {
             String rewardTypeId = line.split(" ")[0];
-            JobQuestRewardType rewardType = QuestManager.getJobQuestRewardType(rewardTypeId);
+            JobQuestRewardType rewardType = JobManager.getJobQuestRewardType(rewardTypeId);
             if (rewardType == null)
                 throw configException("has missing reward type: " + rewardTypeId);
             JobQuestReward reward = rewardType.getJobQuestReward(job, line);
@@ -90,19 +91,19 @@ public class JobQuest implements TaskSource {
         }
     }
 
-    public Job getJob() {
+    public @NotNull Job getJob() {
         return job;
     }
 
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
-    public String getTitle() {
+    public @NotNull String getTitle() {
         return title;
     }
 
-    public JobQuestType getType() {
+    public @NotNull JobQuestType getType() {
         return type;
     }
 
@@ -118,15 +119,15 @@ public class JobQuest implements TaskSource {
         return maxLevel;
     }
 
-    public JobQuestListType getListType() {
+    public @NotNull JobQuestListType getListType() {
         return listType;
     }
 
-    public List<JobQuestTask> getTasks() {
+    public @NotNull List<JobQuestTask> getTasks() {
         return new ArrayList<>(tasks.values());
     }
 
-    public HashSet<JobQuestReward> getRewards() {
+    public @NotNull HashSet<JobQuestReward> getRewards() {
         return new HashSet<>(rewards);
     }
 

@@ -10,6 +10,8 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -100,42 +102,46 @@ public final class Job implements TaskSource {
         // endregion
     }
 
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
-    public Material getIcon() {
+    public @NotNull Material getIcon() {
         return icon;
     }
 
-    public String getShortDescription() {
+    public @NotNull String getShortDescription() {
         return shortDescription;
     }
 
-    public List<String> getFullDescription() {
+    public @NotNull List<String> getFullDescription() {
         return fullDescription;
     }
 
-    public HashSet<JobTask> getJobTasks() {
+    public @NotNull HashSet<JobTask> getJobTasks() {
         return tasks;
     }
 
-    public List<JobQuest> getJobQuests(JobQuestType jobQuestType) {
+    public @NotNull List<JobQuest> getJobQuests(JobQuestType jobQuestType) {
         return switch (jobQuestType) {
             case DAILY -> new ArrayList<>(dailyQuests.values());
             case WEEKLY -> new ArrayList<>(weeklyQuests.values());
         };
     }
 
-    public List<JobQuest> getAllJobQuests() {
+    public boolean hasJobQuests(JobQuestType jobQuestType) {
+        return getJobQuests(jobQuestType).size() > 0;
+    }
+
+    public @NotNull List<JobQuest> getAllJobQuests() {
         return Stream.concat(dailyQuests.values().stream(), weeklyQuests.values().stream()).collect(Collectors.toList());
     }
 
-    public JobQuest getJobQuest(String questId) {
+    public @Nullable JobQuest getJobQuest(@NotNull String questId) {
         JobQuest jobQuest = dailyQuests.get(questId);
         if (jobQuest == null)
             jobQuest = weeklyQuests.get(questId);

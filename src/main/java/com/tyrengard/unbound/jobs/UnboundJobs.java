@@ -20,7 +20,6 @@ public class UnboundJobs extends AManagedPlugin {
 
         setDatabaseManager(new MongoDBDatabaseManager<>(this));
         addManager(new TaskManager(this));
-        addManager(new QuestManager(this));
         addManager(new JobManager(this));
         addManager(new WorkerManager(this));
 

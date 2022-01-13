@@ -103,20 +103,25 @@ public class JobProfileGUI extends ACustomChestGUI {
                     JobQuestData jobQuestData = worker.getJobQuestData(job);
                     for (int c = 0; c < 6; c++) {
                         JobQuestInstance jobQuestInstance = null;
+                        Button<JobProfileGUI> jobQuestButton = null;
                         if (c < 2) { // weekly
-                            if (worker.getWeeklyQuestSlots() > c)
+                            if (jobQuestData.getWeeklyQuestSlots() > c)
                                 jobQuestInstance = jobQuestData.getWeeklyQuest(c);
+                            else
+                                jobQuestButton = getButtonForLockedJobQuestSlot();
                         } else { // daily
-                            if (worker.getDailyQuestSlots() > c - 2)
+                            if (jobQuestData.getDailyQuestSlots() > c - 2)
                                 jobQuestInstance = jobQuestData.getDailyQuest(c - 2);
+                            else
+                                jobQuestButton = getButtonForLockedJobQuestSlot();
                         }
 
-                        Button<JobProfileGUI> jobQuestButton = getButtonForLockedJobQuestSlot();
                         if (jobQuestInstance != null) {
                             JobQuest jobQuest = job.getJobQuest(jobQuestInstance.getQuestId());
                             if (jobQuest != null)
                                 jobQuestButton = getButtonForJobQuestData(jobQuest, jobQuestInstance);
-                        }
+                        } else
+                            jobQuestButton = getButtonForUnlockedJobQuestSlot();
                         contents[getIndex(row, column + 1 + c)] = jobQuestButton;
                     }
                 }
@@ -159,7 +164,7 @@ public class JobProfileGUI extends ACustomChestGUI {
         List<JobQuestTask> tasks = jobQuest.getTasks();
 
         if (tasks.size() > 1)
-            lore.add(ChatColor.YELLOW + "Complete " + ChatColor.WHITE + jobQuest.getListType().toString() +
+            lore.add(ChatColor.YELLOW + "Complete " + ChatColor.WHITE + jobQuest.getListType() +
                     ChatColor.YELLOW + " of the following:");
 
         for (JobQuestTask task : tasks)
@@ -171,6 +176,10 @@ public class JobProfileGUI extends ACustomChestGUI {
                 (gui, e, b) -> {
 
         });
+    }
+
+    private Button<JobProfileGUI> getButtonForUnlockedJobQuestSlot() {
+        return null;
     }
 
     private Button<JobProfileGUI> getButtonForLockedJobQuestSlot() {
