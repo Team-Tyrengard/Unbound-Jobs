@@ -5,7 +5,7 @@ Unbound Jobs is a job plugin for Spigot servers. It was originally started as a 
 --- under construction ---
 
 ## Supported versions
-Currently, Unbound Jobs only supports Minecraft 1.18.1. If enough requests for supporting lower versions are given, we may retrofit the code to support that version. You can also submit pull requests if you manage to retrofit the code yourself!
+Currently, Unbound Jobs only supports Minecraft 1.18 and above. If enough requests for supporting lower versions are given, we may retrofit the code to support that version. You can also submit pull requests if you manage to retrofit the code yourself!
 
 ## Installation and configuration
 You can get the latest version of the plugin via the latest release link on the right, and place it in your `/plugins` folder. After starting your server, you can add job config files inside the plugin's data folder. Then just reload the job configs by running `/unbound-jobs-admin reload-jobs` as an op, and you're ready to start testing your new jobs!
