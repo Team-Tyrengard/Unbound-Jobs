@@ -16,8 +16,13 @@ Click [here](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki) to visit the w
 ## Translations
 Translations will be supported soon!
 
-## Custom Actions and Job Quest Rewards
-Actions are triggers that Unbound Jobs uses to know whether a specific job task or job quest task is completed. We currently support [these](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki/Actions#default) default Actions, but **Unbound Jobs also supports custom actions from third-party plugins via an API**. Simply add the plugin as a dependency via Maven:
+## API
+Unbound Jobs also has an API with allows you to:
+* Add your own [actions](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki/Actions) for job and job quest tasks,
+* Add your own [job quest rewards](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki) specific to your plugin, and
+* Listen for [events](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki) such as quests being done or levelling up
+
+Simply add the plugin as a dependency via Maven:
 
 ```xml
 <dependencies>
