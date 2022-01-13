@@ -1,17 +1,21 @@
 package com.tyrengard.unbound.jobs.quests.internal;
 
 import com.tyrengard.unbound.jobs.Job;
-import com.tyrengard.unbound.jobs.QuestManager;
+import com.tyrengard.unbound.jobs.JobManager;
 import com.tyrengard.unbound.jobs.TaskManager;
+import com.tyrengard.unbound.jobs.actions.Action;
 import com.tyrengard.unbound.jobs.quests.JobQuestReward;
 import com.tyrengard.unbound.jobs.quests.JobQuestRewardType;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.TaskSource;
-import com.tyrengard.unbound.jobs.tasks.TaskType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.TreeMap;
 
 public class JobQuest implements TaskSource {
     private final Job job;
@@ -24,7 +28,7 @@ public class JobQuest implements TaskSource {
     private final TreeMap<Integer, JobQuestTask> tasks;
     private final HashSet<JobQuestReward> rewards;
 
-    public JobQuest(Job job, String id, ConfigurationSection questSection) throws InvalidConfigurationException {
+    public JobQuest(@NotNull Job job, @NotNull String id, @NotNull ConfigurationSection questSection) throws InvalidConfigurationException {
         this.job = job;
         this.id = id;
 
@@ -61,10 +65,10 @@ public class JobQuest implements TaskSource {
         int taskId = 1;
         for (String line : taskLines) {
             String taskTypeId = line.split(" ")[0];
-            TaskType taskType = TaskManager.getTaskType(taskTypeId);
-            if (taskType == null)
+            Action action = TaskManager.getAction(taskTypeId);
+            if (action == null)
                 throw configException("has missing task type: " + taskTypeId);
-            JobQuestTask task = taskType.getJobQuestTask(taskId,this, line);
+            JobQuestTask task = action.getJobQuestTask(taskId,this, line);
             if (task == null)
                 throw configException("has invalid task: " + line);
             tasks.put(taskId, task);
@@ -77,7 +81,7 @@ public class JobQuest implements TaskSource {
             throw configException("has no rewards");
         for (String line : rewardLines) {
             String rewardTypeId = line.split(" ")[0];
-            JobQuestRewardType rewardType = QuestManager.getJobQuestRewardType(rewardTypeId);
+            JobQuestRewardType rewardType = JobManager.getJobQuestRewardType(rewardTypeId);
             if (rewardType == null)
                 throw configException("has missing reward type: " + rewardTypeId);
             JobQuestReward reward = rewardType.getJobQuestReward(job, line);
@@ -87,19 +91,19 @@ public class JobQuest implements TaskSource {
         }
     }
 
-    public Job getJob() {
+    public @NotNull Job getJob() {
         return job;
     }
 
-    public String getId() {
+    public @NotNull String getId() {
         return id;
     }
 
-    public String getTitle() {
+    public @NotNull String getTitle() {
         return title;
     }
 
-    public JobQuestType getType() {
+    public @NotNull JobQuestType getType() {
         return type;
     }
 
@@ -115,15 +119,15 @@ public class JobQuest implements TaskSource {
         return maxLevel;
     }
 
-    public JobQuestListType getListType() {
+    public @NotNull JobQuestListType getListType() {
         return listType;
     }
 
-    public List<JobQuestTask> getTasks() {
+    public @NotNull List<JobQuestTask> getTasks() {
         return new ArrayList<>(tasks.values());
     }
 
-    public HashSet<JobQuestReward> getRewards() {
+    public @NotNull HashSet<JobQuestReward> getRewards() {
         return new HashSet<>(rewards);
     }
 

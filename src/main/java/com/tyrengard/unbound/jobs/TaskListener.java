@@ -1,7 +1,7 @@
 //package net.havengarde.unbound.jobs;
 //
-//import com.tyrengard.aureycore.common.anvilevents.AnvilUseEvent;
-//import com.tyrengard.aureycore.common.utils.InventoryUtils;
+//import com.tyrengard.aureycore.foundation.common.anvilevents.AnvilUseEvent;
+//import com.tyrengard.aureycore.foundation.common.utils.InventoryUtils;
 //import net.havengarde.unbound.jobs.events.TaskPerformEvent;
 //import net.havengarde.unbound.jobs.tasks.impl.*;
 //import org.bukkit.Bukkit;

@@ -1,5 +1,6 @@
 package com.tyrengard.unbound.jobs.tasks;
 
+import com.tyrengard.unbound.jobs.actions.Action;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
 
 public interface JobQuestTask extends Task<JobQuest> {
@@ -9,13 +10,13 @@ public interface JobQuestTask extends Task<JobQuest> {
 
     abstract class Base implements JobQuestTask {
         protected final int id;
-        protected final TaskType type;
+        protected final Action action;
         protected final JobQuest source;
         protected final int amount;
 
-        public Base(int id, TaskType type, JobQuest source, int amount) {
+        public Base(int id, Action action, JobQuest source, int amount) {
             this.id = id;
-            this.type = type;
+            this.action = action;
             this.source = source;
             this.amount = amount;
         }
@@ -31,8 +32,8 @@ public interface JobQuestTask extends Task<JobQuest> {
         }
 
         @Override
-        public TaskType getType() {
-            return type;
+        public Action getAction() {
+            return action;
         }
 
         @Override

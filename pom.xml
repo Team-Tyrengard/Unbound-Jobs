@@ -5,7 +5,7 @@
     <parent>
         <artifactId>unbound-core</artifactId>
         <groupId>com.tyrengard.unbound</groupId>
-        <version>1.0</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -26,10 +26,6 @@
             <groupId>com.fathzer</groupId>
             <artifactId>javaluator</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>dev.morphia.morphia</groupId>-->
-<!--            <artifactId>morphia-core</artifactId>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -37,6 +33,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.fathzer.soft.javaluator</pattern>
+                            <shadedPattern>com.tyrengard.unbound.jobs.internal.javaluator</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
             </plugin>
         </plugins>
     </build>

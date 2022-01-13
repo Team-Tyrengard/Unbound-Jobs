@@ -1,27 +1,28 @@
 package com.tyrengard.unbound.jobs.tasks;
 
 import com.tyrengard.unbound.jobs.Job;
+import com.tyrengard.unbound.jobs.actions.Action;
 
 public interface JobTask extends Task<Job> {
     double getBasePay();
     int getBaseExp();
 
     abstract class Base implements JobTask {
-        protected final TaskType type;
+        protected final Action action;
         protected final Job source;
         protected final double basePay;
         protected final int baseExp;
 
-        public Base(TaskType type, Job source, double basePay, int baseExp) {
-            this.type = type;
+        public Base(Action action, Job source, double basePay, int baseExp) {
+            this.action = action;
             this.source = source;
             this.basePay = basePay;
             this.baseExp = baseExp;
         }
 
         @Override
-        public TaskType getType() {
-            return type;
+        public Action getAction() {
+            return action;
         }
 
         @Override

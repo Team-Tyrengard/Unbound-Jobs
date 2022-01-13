@@ -1,16 +1,17 @@
 package com.tyrengard.unbound.jobs.workers;
 
-import com.tyrengard.aureycore.common.random.RandomSelector;
-import com.tyrengard.aureycore.common.struct.UUIDDataType;
-import com.tyrengard.aureycore.common.utils.BossBarUtils;
 import com.tyrengard.aureycore.foundation.ADataManager;
 import com.tyrengard.aureycore.foundation.Configured;
+import com.tyrengard.aureycore.foundation.common.random.RandomSelector;
+import com.tyrengard.aureycore.foundation.common.struct.UUIDDataType;
+import com.tyrengard.aureycore.foundation.common.utils.BossBarUtils;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.JobData;
 import com.tyrengard.unbound.jobs.JobManager;
 import com.tyrengard.unbound.jobs.UnboundJobs;
 import com.tyrengard.unbound.jobs.events.JobLevelUpEvent;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
 import net.milkbowl.vault.economy.Economy;
@@ -27,6 +28,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -119,7 +121,7 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
 
     public static Worker createNewWorker(UUID id) {
         // TODO: config should set default slots
-        Worker worker = new Worker(id, 2, 1);
+        Worker worker = new Worker(id);
         instance.workers.put(id, worker);
         instance.saveObject(worker);
         return worker;
@@ -130,8 +132,10 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
         p.sendMessage("Joined job " + j.getName() + ".");
     }
 
-    public static void rollDailyQuest(Worker worker, Job job, int slot) {
-        if (job.getJobQuests(JobQuestType.DAILY).size() > 0) {
+    public static void rollDailyQuest(@NotNull Worker worker, @NotNull Job job, int slot) {
+        if (job.hasJobQuests(JobQuestType.DAILY)) {
+            worker.setDailyJobQuest(job, slot, null);
+
             List<String> assignedJobQuestIds = worker.getJobQuestData(job).getQuestIds(JobQuestType.DAILY);
             List<JobQuest> jobQuestPool = job.getJobQuests(JobQuestType.DAILY).stream()
                     .filter(jq -> !assignedJobQuestIds.contains(jq.getId()))
@@ -140,12 +144,14 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
                 return;
 
             JobQuest jobQuest = rollJobQuest(jobQuestPool);
-            worker.setDailyJobQuest(jobQuest, slot);
+            worker.setDailyJobQuest(job, slot, jobQuest);
         }
     }
 
-    public static void rollWeeklyQuest(Worker worker, Job job, int slot) {
-        if (job.getJobQuests(JobQuestType.WEEKLY).size() > 0) {
+    public static void rollWeeklyQuest(@NotNull Worker worker, @NotNull Job job, int slot) {
+        if (job.hasJobQuests(JobQuestType.WEEKLY)) {
+            worker.setWeeklyJobQuest(job, slot, null);
+
             List<String> assignedJobQuestIds = worker.getJobQuestData(job).getQuestIds(JobQuestType.WEEKLY);
             List<JobQuest> jobQuestPool = job.getJobQuests(JobQuestType.WEEKLY).stream()
                     .filter(jq -> !assignedJobQuestIds.contains(jq.getId()))
@@ -154,15 +160,16 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
                 return;
 
             JobQuest jobQuest = rollJobQuest(jobQuestPool);
-            worker.setWeeklyJobQuest(jobQuest, slot);
+            worker.setWeeklyJobQuest(job, slot, jobQuest);
         }
     }
 
     public static void refreshQuests(Worker worker, JobQuestType jobQuestType) {
         boolean daily = jobQuestType == JobQuestType.DAILY;
-        int slots = daily ? worker.getDailyQuestSlots() : worker.getWeeklyQuestSlots();
 
         for (Job job : worker.getJobs()) {
+            JobQuestData jobQuestData = worker.getJobQuestData(job);
+            int slots = daily ? jobQuestData.getDailyQuestSlots() : jobQuestData.getWeeklyQuestSlots();
             for (int slot = 0; slot < slots; slot++)
                 if (daily)
                     rollDailyQuest(worker, job, slot);

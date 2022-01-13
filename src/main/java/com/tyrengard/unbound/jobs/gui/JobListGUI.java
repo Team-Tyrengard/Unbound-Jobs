@@ -10,7 +10,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 public class JobListGUI extends ACustomChestGUI {
     private final boolean joinJobsViaGUI;
@@ -56,8 +59,7 @@ public class JobListGUI extends ACustomChestGUI {
         lore.add("");
         lore.add(ChatColor.WHITE + "LEFT-CLICK" + ChatColor.GRAY + " to see tasks, quests, and skills");
 
-        return new Button<>(job.getIcon(), ChatColor.YELLOW + job.getName(), lore, (gui, e, b) -> {
-            CustomGUIManager.openGUI(new JobInfoGUI(job), (Player) e.getWhoClicked());
-        });
+        return new Button<>(job.getIcon(), ChatColor.YELLOW + job.getName(), lore, (gui, e, b) ->
+                CustomGUIManager.openGUI(new JobInfoGUI(job), (Player) e.getWhoClicked()));
     }
 }
