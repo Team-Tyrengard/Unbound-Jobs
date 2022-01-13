@@ -5,15 +5,16 @@ import com.tyrengard.unbound.jobs.JobData;
 import com.tyrengard.unbound.jobs.JobManager;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
-import com.tyrengard.unbound.jobs.tasks.JobTask;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
 import dev.morphia.annotations.AlsoLoad;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 public final class Worker {

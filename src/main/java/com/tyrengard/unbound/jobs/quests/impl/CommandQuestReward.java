@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandException;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
 import java.util.logging.Level;
 
 public class CommandQuestReward implements JobQuestReward {

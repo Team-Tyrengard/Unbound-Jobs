@@ -1,18 +1,18 @@
 package com.tyrengard.unbound.jobs;
 
-import com.tyrengard.aureycore.foundation.common.stringformat.ChatFormat;
-import com.tyrengard.aureycore.foundation.common.utils.PlayerUtils;
-import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.aureycore.customguis.CustomGUIManager;
 import com.tyrengard.aureycore.foundation.ACommandExecutor;
 import com.tyrengard.aureycore.foundation.CommandDeclaration;
+import com.tyrengard.aureycore.foundation.common.stringformat.ChatFormat;
+import com.tyrengard.aureycore.foundation.common.utils.PlayerUtils;
+import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.gui.JobListGUI;
-import com.tyrengard.unbound.jobs.gui.JobProfileTab;
-import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
 import com.tyrengard.unbound.jobs.gui.JobProfileGUI;
+import com.tyrengard.unbound.jobs.gui.JobProfileTab;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
 import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
+import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;

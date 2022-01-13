@@ -1,13 +1,9 @@
 package com.tyrengard.unbound.jobs.quests.internal;
 
-import com.tyrengard.unbound.jobs.tasks.TaskType;
 import dev.morphia.annotations.Entity;
 
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Entity
 public class JobQuestInstance {

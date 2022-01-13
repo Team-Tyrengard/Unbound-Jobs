@@ -1,8 +1,10 @@
-package com.tyrengard.unbound.jobs.tasks;
+package com.tyrengard.unbound.jobs.actions;
 
 import com.tyrengard.unbound.jobs.Job;
-import com.tyrengard.unbound.jobs.tasks.impl.*;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
+import com.tyrengard.unbound.jobs.tasks.JobTask;
+import com.tyrengard.unbound.jobs.tasks.impl.*;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 
@@ -11,13 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public interface TaskType {
+public interface Action {
     String getId();
     JobTask getJobTask(Job source, String shortFormString);
     JobTask getJobTask(Job source, Map<?, ?> expandedFormMap);
     JobQuestTask getJobQuestTask(int jobQuestTaskId, JobQuest source, String shortFormString);
 
-    enum Default implements TaskType {
+    enum Default implements Action {
         BREAK_BLOCK, BREED_ANIMAL, BREW_POTION, CATCH_FISH, CRAFT_ITEM, GATHER_ANIMAL, HARVEST_BLOCK, KILL_MOB,
         PLACE_BLOCK, REPAIR_ITEM, SMELT_ITEM, SOW_PLANT;
 

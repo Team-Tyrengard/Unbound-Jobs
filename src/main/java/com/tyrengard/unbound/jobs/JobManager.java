@@ -2,9 +2,9 @@ package com.tyrengard.unbound.jobs;
 
 import com.fathzer.soft.javaluator.DoubleEvaluator;
 import com.fathzer.soft.javaluator.StaticVariableSet;
-import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.aureycore.foundation.AManager;
 import com.tyrengard.aureycore.foundation.Configured;
+import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.enums.PaymentPeriod;
 import com.tyrengard.unbound.jobs.events.JobTaskPerformEvent;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;

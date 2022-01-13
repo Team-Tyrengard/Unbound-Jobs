@@ -1,8 +1,9 @@
 package com.tyrengard.unbound.jobs;
 
-import com.tyrengard.aureycore.foundation.common.utils.InventoryUtils;
 import com.tyrengard.aureycore.foundation.AManager;
 import com.tyrengard.aureycore.foundation.Configured;
+import com.tyrengard.aureycore.foundation.common.utils.InventoryUtils;
+import com.tyrengard.unbound.jobs.actions.Action;
 import com.tyrengard.unbound.jobs.events.JobQuestTaskPerformEvent;
 import com.tyrengard.unbound.jobs.events.JobTaskPerformEvent;
 import com.tyrengard.unbound.jobs.events.TaskPerformEvent;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 
 public final class TaskManager extends AManager<UnboundJobs> implements Listener, Configured {
     private static NamespacedKey UJ_PAID_KEY;
-    private final HashMap<String, TaskType> taskTypes;
+    private final HashMap<String, Action> actions;
 
     // region Config values
     private List<String> worldsAllowed;
@@ -57,15 +58,15 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         instance = this;
 
         UJ_PAID_KEY = new NamespacedKey(plugin, "paid");
-        taskTypes = new HashMap<>();
+        actions = new HashMap<>();
     }
 
     // region Manager overrides
     @Override
     protected void startup() {
-        for (TaskType taskType : TaskType.Default.values()) {
+        for (Action action : Action.Default.values()) {
             try {
-                registerTaskType(taskType);
+                registerAction(action);
             } catch (UnboundJobsException e) {
                 e.printStackTrace();
             }
@@ -92,16 +93,16 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
     }
     // endregion
 
-    public static void registerTaskType(TaskType taskType) throws UnboundJobsException {
-        String taskTypeId = taskType.getId();
-        if (instance.taskTypes.containsKey(taskTypeId))
-            throw new UnboundJobsException("The task type id \"" + taskTypeId + "\" already exists.");
+    public static void registerAction(Action action) throws UnboundJobsException {
+        String actionId = action.getId();
+        if (instance.actions.containsKey(actionId))
+            throw new UnboundJobsException("The action id \"" + actionId + "\" already exists.");
         else
-            instance.taskTypes.put(taskTypeId, taskType);
+            instance.actions.put(actionId, action);
     }
 
-    public static TaskType getTaskType(String taskTypeId) {
-        return instance.taskTypes.get(taskTypeId);
+    public static Action getAction(String actionId) {
+        return instance.actions.get(actionId);
     }
 
     //region Event listeners
@@ -116,10 +117,10 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         switch (b.getType()) {
             case WHEAT, NETHER_WART, CARROTS, POTATOES, BEETROOTS, SUGAR_CANE -> {
                 if (b.getBlockData() instanceof Ageable a && a.getAge() == a.getMaximumAge()) {
-                    Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, TaskType.Default.HARVEST_BLOCK, e.getBlock()));
+                    Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.HARVEST_BLOCK, e.getBlock()));
                 }
             }
-            default -> Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, TaskType.Default.BREAK_BLOCK, e.getBlock()));
+            default -> Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.BREAK_BLOCK, e.getBlock()));
         }
     }
 
@@ -128,7 +129,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         if (e.getBreeder() instanceof Player p) {
             if (!worldsAllowed.contains(p.getWorld().getName()))
                 return;
-            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, TaskType.Default.BREED_ANIMAL, e.getEntity()));
+            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.BREED_ANIMAL, e.getEntity()));
         }
     }
 
@@ -147,7 +148,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         for (ItemStack i : InventoryUtils.getProductsOfBrewerInventory(bi)) {
             if (i != null && i.getItemMeta() instanceof PotionMeta potionMeta && (potionMeta).getPersistentDataContainer()
                     .get(UJ_PAID_KEY, PersistentDataType.BYTE) == null) {
-                Bukkit.getPluginManager().callEvent(new TaskPerformEvent(Bukkit.getPlayer(w.getId()), TaskType.Default.BREW_POTION, i));
+                Bukkit.getPluginManager().callEvent(new TaskPerformEvent(Bukkit.getPlayer(w.getId()), Action.Default.BREW_POTION, i));
             }
         }
     }
@@ -158,7 +159,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
             return;
 
         if (e.getCaught() instanceof Item caughtItem) {
-            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), TaskType.Default.CATCH_FISH, caughtItem));
+            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), Action.Default.CATCH_FISH, caughtItem));
         }
     }
 
@@ -167,7 +168,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         if (!worldsAllowed.contains(e.getWhoClicked().getWorld().getName()))
             return;
 
-        Bukkit.getPluginManager().callEvent(new TaskPerformEvent((Player) e.getWhoClicked(), TaskType.Default.CRAFT_ITEM, e.getRecipe().getResult()));
+        Bukkit.getPluginManager().callEvent(new TaskPerformEvent((Player) e.getWhoClicked(), Action.Default.CRAFT_ITEM, e.getRecipe().getResult()));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -176,7 +177,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
             return;
 
         if (e.getHarvestedBlock().getBlockData() instanceof Ageable a && a.getAge() == a.getMaximumAge())
-            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), TaskType.Default.HARVEST_BLOCK, e.getHarvestedBlock()));
+            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), Action.Default.HARVEST_BLOCK, e.getHarvestedBlock()));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -187,14 +188,14 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         if (!worldsAllowed.contains(p.getWorld().getName()))
             return;
 
-        Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, TaskType.Default.KILL_MOB, e.getEntity()));
+        Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.KILL_MOB, e.getEntity()));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onBlockPlace(BlockPlaceEvent e) {
         if (!worldsAllowed.contains(e.getPlayer().getWorld().getName()))
             return;
-        Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), TaskType.Default.PLACE_BLOCK, e.getBlock()));
+        Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), Action.Default.PLACE_BLOCK, e.getBlock()));
     }
 
 //    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)

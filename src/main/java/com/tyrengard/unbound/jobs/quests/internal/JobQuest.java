@@ -3,15 +3,18 @@ package com.tyrengard.unbound.jobs.quests.internal;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.QuestManager;
 import com.tyrengard.unbound.jobs.TaskManager;
+import com.tyrengard.unbound.jobs.actions.Action;
 import com.tyrengard.unbound.jobs.quests.JobQuestReward;
 import com.tyrengard.unbound.jobs.quests.JobQuestRewardType;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.TaskSource;
-import com.tyrengard.unbound.jobs.tasks.TaskType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.TreeMap;
 
 public class JobQuest implements TaskSource {
     private final Job job;
@@ -61,10 +64,10 @@ public class JobQuest implements TaskSource {
         int taskId = 1;
         for (String line : taskLines) {
             String taskTypeId = line.split(" ")[0];
-            TaskType taskType = TaskManager.getTaskType(taskTypeId);
-            if (taskType == null)
+            Action action = TaskManager.getAction(taskTypeId);
+            if (action == null)
                 throw configException("has missing task type: " + taskTypeId);
-            JobQuestTask task = taskType.getJobQuestTask(taskId,this, line);
+            JobQuestTask task = action.getJobQuestTask(taskId,this, line);
             if (task == null)
                 throw configException("has invalid task: " + line);
             tasks.put(taskId, task);

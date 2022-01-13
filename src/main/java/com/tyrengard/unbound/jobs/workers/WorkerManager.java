@@ -1,10 +1,10 @@
 package com.tyrengard.unbound.jobs.workers;
 
+import com.tyrengard.aureycore.foundation.ADataManager;
+import com.tyrengard.aureycore.foundation.Configured;
 import com.tyrengard.aureycore.foundation.common.random.RandomSelector;
 import com.tyrengard.aureycore.foundation.common.struct.UUIDDataType;
 import com.tyrengard.aureycore.foundation.common.utils.BossBarUtils;
-import com.tyrengard.aureycore.foundation.ADataManager;
-import com.tyrengard.aureycore.foundation.Configured;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.JobData;
 import com.tyrengard.unbound.jobs.JobManager;

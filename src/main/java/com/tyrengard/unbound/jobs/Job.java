@@ -1,11 +1,11 @@
 package com.tyrengard.unbound.jobs;
 
 import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
+import com.tyrengard.unbound.jobs.actions.Action;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
 import com.tyrengard.unbound.jobs.tasks.JobTask;
 import com.tyrengard.unbound.jobs.tasks.TaskSource;
-import com.tyrengard.unbound.jobs.tasks.TaskType;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -79,20 +79,20 @@ public final class Job implements TaskSource {
         tasks = new HashSet<>();
         for (String line : jobConfig.getStringList("tasks")) {
             String taskTypeId = line.split(" ")[0];
-            TaskType taskType = TaskManager.getTaskType(taskTypeId);
-            if (taskType == null)
+            Action action = TaskManager.getAction(taskTypeId);
+            if (action == null)
                 throw configException("has missing task type: " + taskTypeId);
-            JobTask task = taskType.getJobTask(this, line);
+            JobTask task = action.getJobTask(this, line);
             if (task == null)
                 throw configException("has invalid short-form task: " + line);
             tasks.add(task);
         }
         for (Map<?, ?> configSectionMap : jobConfig.getMapList("tasks")) {
             String taskTypeId = (String) configSectionMap.get("task");
-            TaskType taskType = TaskManager.getTaskType(taskTypeId);
-            if (taskType == null)
+            Action action = TaskManager.getAction(taskTypeId);
+            if (action == null)
                 throw configException("has missing task type: " + taskTypeId);
-            JobTask task = taskType.getJobTask(this, configSectionMap);
+            JobTask task = action.getJobTask(this, configSectionMap);
             if (task == null)
                 throw configException("has invalid expanded task: " + configSectionMap);
             tasks.add(task);

@@ -1,6 +1,8 @@
 package com.tyrengard.unbound.jobs.tasks;
 
+import com.tyrengard.unbound.jobs.actions.Action;
+
 public interface Task<S extends TaskSource> {
-    TaskType getType();
+    Action getAction();
     S getSource();
 }
