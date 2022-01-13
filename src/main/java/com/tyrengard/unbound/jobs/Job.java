@@ -1,6 +1,6 @@
 package com.tyrengard.unbound.jobs;
 
-import com.tyrengard.aureycore.common.utils.StringUtils;
+import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
 import com.tyrengard.unbound.jobs.tasks.JobTask;

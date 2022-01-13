@@ -2,11 +2,7 @@ package com.tyrengard.unbound.jobs;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.tyrengard.aureycore.common.struct.UUIDDataType;
-import com.tyrengard.unbound.jobs.workers.Worker;
-import com.tyrengard.unbound.jobs.workers.WorkerManager;
 import org.bukkit.entity.Player;
-import org.bukkit.persistence.PersistentDataHolder;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,7 +13,6 @@ import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.UUID;
 
 class Utils {
 

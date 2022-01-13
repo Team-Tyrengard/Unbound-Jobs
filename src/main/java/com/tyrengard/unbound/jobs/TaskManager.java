@@ -1,6 +1,6 @@
 package com.tyrengard.unbound.jobs;
 
-import com.tyrengard.aureycore.common.utils.InventoryUtils;
+import com.tyrengard.aureycore.foundation.common.utils.InventoryUtils;
 import com.tyrengard.aureycore.foundation.AManager;
 import com.tyrengard.aureycore.foundation.Configured;
 import com.tyrengard.unbound.jobs.events.JobQuestTaskPerformEvent;

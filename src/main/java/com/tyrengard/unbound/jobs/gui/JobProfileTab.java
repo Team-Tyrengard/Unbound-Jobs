@@ -1,6 +1,6 @@
 package com.tyrengard.unbound.jobs.gui;
 
-import com.tyrengard.aureycore.common.utils.StringUtils;
+import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.aureycore.customguis.Button;
 import com.tyrengard.aureycore.customguis.Information;
 import org.bukkit.ChatColor;

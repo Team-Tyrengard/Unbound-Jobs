@@ -1,8 +1,8 @@
 package com.tyrengard.unbound.jobs;
 
-import com.tyrengard.aureycore.common.stringformat.ChatFormat;
-import com.tyrengard.aureycore.common.utils.PlayerUtils;
-import com.tyrengard.aureycore.common.utils.StringUtils;
+import com.tyrengard.aureycore.foundation.common.stringformat.ChatFormat;
+import com.tyrengard.aureycore.foundation.common.utils.PlayerUtils;
+import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.aureycore.customguis.CustomGUIManager;
 import com.tyrengard.aureycore.foundation.ACommandExecutor;
 import com.tyrengard.aureycore.foundation.CommandDeclaration;
