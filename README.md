@@ -16,7 +16,7 @@ Click [here](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki) to visit the w
 ## Translations
 Translations will be supported soon!
 
-## API
+## API and integration
 Unbound Jobs also has an API with allows you to:
 * Add your own [actions](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki/Actions) for job and job quest tasks,
 * Add your own [job quest rewards](https://github.com/Team-Tyrengard/Unbound-Jobs/wiki) specific to your plugin, and
@@ -50,6 +50,7 @@ To use SNAPSHOT versions, add the Sonatype Snapshots repository:
     ...
 </repositories>
 ```
+If you add your own actions or job quest rewards, don't forget to [let us know](https://github.com/Team-Tyrengard/Unbound-Jobs/issues/new?labels=integration), so we can add integration for it!
 
 ## Demo
 --- under construction ---
