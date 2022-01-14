@@ -50,7 +50,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
     private final HashMap<String, Action> actions;
 
     // region Config values
-    private List<String> worldsAllowed;
+    private List<String> worldsDisabled;
     // endregion
 
     private static TaskManager instance;
@@ -87,9 +87,9 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
             throw new InvalidConfigurationException("Plugin config has missing section: " + "general");
 
         // region Worlds allowed
-        if (!generalSection.contains("worlds-allowed"))
-            throw new InvalidConfigurationException("Plugin config has missing section: " + "general.worlds-allowed");
-        worldsAllowed = generalSection.getStringList("worlds-allowed");
+        if (!generalSection.contains("worlds-disabled"))
+            throw new InvalidConfigurationException("Plugin config has missing section: " + "general.worlds-disabled");
+        worldsDisabled = generalSection.getStringList("worlds-disabled");
         // endregion
     }
     // endregion
@@ -112,7 +112,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         Player p = e.getPlayer();
         Block b = e.getBlock();
 
-        if (!worldsAllowed.contains(p.getWorld().getName()))
+        if (worldsDisabled.contains(p.getWorld().getName()))
             return;
 
         switch (b.getType()) {
@@ -128,7 +128,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onEntityBreed(EntityBreedEvent e) {
         if (e.getBreeder() instanceof Player p) {
-            if (!worldsAllowed.contains(p.getWorld().getName()))
+            if (worldsDisabled.contains(p.getWorld().getName()))
                 return;
             Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.BREED_ANIMAL, e.getEntity()));
         }
@@ -140,7 +140,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         BrewingStand bs = bi.getHolder();
         if (bs == null) return;
 
-        if (!worldsAllowed.contains(bs.getBlock().getWorld().getName()))
+        if (worldsDisabled.contains(bs.getBlock().getWorld().getName()))
             return;
 
         Worker w = WorkerManager.getActiveWorker(bs);
@@ -156,7 +156,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onPlayerFish(PlayerFishEvent e) {
-        if (!worldsAllowed.contains(e.getPlayer().getWorld().getName()))
+        if (worldsDisabled.contains(e.getPlayer().getWorld().getName()))
             return;
 
         if (e.getCaught() instanceof Item caughtItem) {
@@ -166,7 +166,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onCraftItem(CraftItemEvent e) {
-        if (!worldsAllowed.contains(e.getWhoClicked().getWorld().getName()))
+        if (worldsDisabled.contains(e.getWhoClicked().getWorld().getName()))
             return;
 
         Bukkit.getPluginManager().callEvent(new TaskPerformEvent((Player) e.getWhoClicked(), Action.Default.CRAFT_ITEM, e.getRecipe().getResult()));
@@ -174,7 +174,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onPlayerHarvestBlock(PlayerHarvestBlockEvent e) {
-        if (!worldsAllowed.contains(e.getPlayer().getWorld().getName()))
+        if (worldsDisabled.contains(e.getPlayer().getWorld().getName()))
             return;
 
         if (e.getHarvestedBlock().getBlockData() instanceof Ageable a && a.getAge() == a.getMaximumAge())
@@ -186,7 +186,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         Player p = e.getEntity().getKiller();
         if (p == null)
             return;
-        if (!worldsAllowed.contains(p.getWorld().getName()))
+        if (worldsDisabled.contains(p.getWorld().getName()))
             return;
 
         Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.KILL_MOB, e.getEntity()));
@@ -194,7 +194,7 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onBlockPlace(BlockPlaceEvent e) {
-        if (!worldsAllowed.contains(e.getPlayer().getWorld().getName()))
+        if (worldsDisabled.contains(e.getPlayer().getWorld().getName()))
             return;
         Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), Action.Default.PLACE_BLOCK, e.getBlock()));
     }

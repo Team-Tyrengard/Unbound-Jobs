@@ -1,8 +1,8 @@
 # General config options
 general:
-  # List of worlds where job tasks earn money and job quests can be completed. Use world names (case-sensitive).
-  worlds-allowed:
-    - world
+  # List of worlds where jobs and job quests are disabled. Use world names (case-sensitive).
+  worlds-disabled:
+    - none
 
 # OPTIONAL: Config options for commands
 commands:
