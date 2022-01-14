@@ -6,6 +6,7 @@ import com.tyrengard.unbound.jobs.JobManager;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
+import com.tyrengard.unbound.jobs.workers.enums.ProfileVisibility;
 import dev.morphia.annotations.AlsoLoad;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
@@ -30,18 +31,23 @@ public final class Worker {
 
     private LocalDate lastQuestRefreshDate;
 
+    // region Settings
+    private ProfileVisibility profileVisibility;
     private BossBarExpIndicatorSetting bossBarExpIndicatorSetting;
+    // endregion
 
-    public Worker(UUID id) {
-        this(id, new HashMap<>(), new HashMap<>(), BossBarExpIndicatorSetting.DEFAULT);
+    public Worker(UUID id, ProfileVisibility profileVisibility) {
+        this(id, new HashMap<>(), new HashMap<>(), profileVisibility, BossBarExpIndicatorSetting.DEFAULT);
     }
 
     public Worker(UUID id, HashMap<String, JobData> jobData,
                   HashMap<String, JobQuestData> jobQuestData,
+                  ProfileVisibility profileVisibility,
                   BossBarExpIndicatorSetting bossBarExpIndicatorSetting) {
         this.id = id;
         this.jobData = jobData;
         this.jobQuestData = jobQuestData;
+        this.profileVisibility = profileVisibility;
         this.bossBarExpIndicatorSetting = bossBarExpIndicatorSetting;
     }
 
@@ -103,6 +109,14 @@ public final class Worker {
 
     public void setBossBarExpIndicatorSetting(BossBarExpIndicatorSetting bossBarExpIndicatorSetting) {
         this.bossBarExpIndicatorSetting = bossBarExpIndicatorSetting;
+    }
+
+    public ProfileVisibility getProfileVisibility() {
+        return profileVisibility;
+    }
+
+    public void setProfileVisibility(ProfileVisibility profileVisibility) {
+        this.profileVisibility = profileVisibility;
     }
 
     private @NotNull HashMap<String, JobData> getJobDataMap() {

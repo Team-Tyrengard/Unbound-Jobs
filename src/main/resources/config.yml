@@ -5,6 +5,7 @@ general:
     - none
 
 # OPTIONAL: Config options for commands
+# If you want to build custom GUIs for UnboundJobs, or want to stick to the non-GUI commands, disable everything below.
 commands:
   # OPTIONAL: Config for job list GUI ("/jobs list")
   job-list:
@@ -15,6 +16,16 @@ commands:
     # OPTIONAL: Enable/disable players joining jobs through the "/jobs list" GUI.
     # default: true
     join-jobs: true
+
+  # OPTIONAL: Config for job profile GUI ("/jobs profile", "/jobs quests", "/jobs news", "/jobs settings")
+  job-profile:
+    # OPTIONAL: Enable/disable players bringing up the job profile GUI.
+    # default: true
+    enabled: true
+
+    # OPTIONAL: Enable/disable players viewing the job profile of others using the "/jobs profile <player-name>" command.
+    # default: true
+    allow-public-profiles: true
 
 # Config options for players
 workers:
@@ -31,13 +42,18 @@ workers:
   # Allowed values: sunday, monday, tuesday, wednesday, thursday, friday, saturday
   weekly-quest-reroll-day: sunday
 
+  # OPTIONAL: Default profile visibility. Will only apply to new players.
+  # Allowed values: public, private
+  # default: private
+  default-profile-visiblity: private
+
 # Config options for jobs
 jobs:
   # OPTIONAL: List of disabled jobs. Add job names in kebab-case.
   # Useful for when you want to disable jobs without moving/deleting their config files.
   # Uncomment to use.
-  #disabled-jobs:
-  #  - job-name-in-kebab-case
+  disabled-jobs:
+    - none
 
   # Supported values: 1-32767
   max-level: 100

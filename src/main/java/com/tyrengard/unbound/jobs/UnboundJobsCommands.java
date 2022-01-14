@@ -13,6 +13,7 @@ import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
 import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
+import com.tyrengard.unbound.jobs.workers.enums.ProfileVisibility;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -40,16 +41,29 @@ public class UnboundJobsCommands extends ACommandExecutor {
         addAdminCommands();
         Bukkit.getLogger().info("Adding /unbound-jobs commands...");
 
-        boolean jobListGUIEnabled = true, playersCanJoinJobsViaListGUI = true;
+        boolean jobListGUIEnabled = true, playersCanJoinJobsViaListGUI = true,
+                jobProfileGUIEnabled = true, allowPublicProfiles = true;
         ConfigurationSection commandsConfig = config.getConfigurationSection("commands");
         if (commandsConfig != null) {
+            // region /unbound-jobs list configs
             ConfigurationSection jobListConfig = commandsConfig.getConfigurationSection("job-list");
             if (jobListConfig != null) {
-                jobListGUIEnabled = jobListConfig.getBoolean("enabled");
-                playersCanJoinJobsViaListGUI = jobListConfig.getBoolean("join-jobs");
+                jobListGUIEnabled = jobListConfig.getBoolean("enabled", true);
+                playersCanJoinJobsViaListGUI = jobListConfig.getBoolean("join-jobs", true);
             }
+            // endregion
+            // region /unbound-jobs profile|quests|news|settings configs
+            ConfigurationSection jobProfileConfig = commandsConfig.getConfigurationSection("job-profile");
+            if (jobProfileConfig != null) {
+                jobProfileGUIEnabled = jobProfileConfig.getBoolean("enabled", true);
+                allowPublicProfiles = jobProfileConfig.getBoolean("allow-public-profiles", true);
+            }
+            // endregion
         }
-        addRegularCommands(jobListGUIEnabled, playersCanJoinJobsViaListGUI);
+
+        addJobProfileCommands(jobProfileGUIEnabled, allowPublicProfiles);
+        addJobListCommands(jobListGUIEnabled, playersCanJoinJobsViaListGUI);
+        addNonGUICommands();
 
         createHelpCommands(UNBOUND_HELP_HEADER, ChatColor.DARK_PURPLE, ChatColor.AQUA);
     }
@@ -117,7 +131,68 @@ public class UnboundJobsCommands extends ACommandExecutor {
         }));
     }
 
-    public void addRegularCommands(boolean jobListGUIEnabled, boolean playersCanJoinJobsViaListGUI) {
+    private void addJobProfileCommands(boolean jobProfileGUIEnabled, boolean allowPublicProfiles) {
+        // region Job profile GUI
+        // /unbound-jobs profile
+        if (jobProfileGUIEnabled) {
+            addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
+                    "profile", "Open job profile", new String[0], (p, args) -> {
+                Player target = p;
+                if (args.length > 1) {
+                    String targetName = args[1];
+                    target = Bukkit.getPlayerExact(targetName);
+                    if (target != p) {
+                        if (target == null) {
+                            p.sendMessage(ChatColor.RED + "There is no player named " + targetName + " who is online.");
+                            return true;
+                        } else if (!allowPublicProfiles) {
+                            p.sendMessage(ChatColor.RED + "Public profiles are disabled for this server.");
+                            return true;
+                        } else if (WorkerManager.obtainWorker(target.getUniqueId()).getProfileVisibility() == ProfileVisibility.PRIVATE) {
+                            p.sendMessage(ChatColor.RED + "That player's profile is private.");
+                            return true;
+                        }
+                    }
+                }
+                CustomGUIManager.openGUI(new JobProfileGUI(target, JobProfileTab.JOBS), p);
+                return true;
+            }));
+
+            // /unbound-jobs quests
+            addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
+                    "quests", "Open job quests", new String[0], (p, args) -> {
+                CustomGUIManager.openGUI(new JobProfileGUI(p, JobProfileTab.QUESTS), p);
+                return true;
+            }));
+
+            // /unbound-jobs news
+            addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
+                    "news", "Open job news", new String[0], (p, args) -> {
+                CustomGUIManager.openGUI(new JobProfileGUI(p, JobProfileTab.NEWS), p);
+                return true;
+            }));
+
+            // /unbound-jobs settings
+            addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
+                    "settings", "Open job settings", new String[0], (p, args) -> {
+                CustomGUIManager.openGUI(new JobProfileGUI(p, JobProfileTab.SETTINGS), p);
+                return true;
+            }));
+        }
+        // endregion
+    }
+
+    private void addJobListCommands(boolean jobListGUIEnabled, boolean playersCanJoinJobsViaListGUI) {
+        // /unbound-jobs list
+        if (jobListGUIEnabled)
+            addPlayerCommand(new CommandDeclaration<>(false, baseCommandString,
+                    "list", "Open up a list of available jobs", new String[0], (p, args) -> {
+                CustomGUIManager.openGUI(new JobListGUI(playersCanJoinJobsViaListGUI), p);
+                return true;
+            }));
+    }
+
+    private void addNonGUICommands() {
         // TEMPORARY REROLL QUESTS
         addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
                 "reroll-quests", null, new String[0], (p, args) -> {
@@ -127,36 +202,6 @@ public class UnboundJobsCommands extends ACommandExecutor {
             p.sendMessage("Quests refreshed.");
             return true;
         }));
-
-        // region Job profile GUI
-        // /unbound-jobs profile
-        addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
-                "profile", "Open job profile", new String[0], (p, args) -> {
-            CustomGUIManager.openGUI(new JobProfileGUI(p, JobProfileTab.JOBS), p);
-            return true;
-        }));
-
-        // /unbound-jobs quests
-        addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
-                "quests", "Open job quests", new String[0], (p, args) -> {
-            CustomGUIManager.openGUI(new JobProfileGUI(p, JobProfileTab.QUESTS), p);
-            return true;
-        }));
-
-        // /unbound-jobs news
-        addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
-                "news", "Open job news", new String[0], (p, args) -> {
-            CustomGUIManager.openGUI(new JobProfileGUI(p, JobProfileTab.NEWS), p);
-            return true;
-        }));
-
-        // /unbound-jobs settings
-        addPlayerCommand(new CommandDeclaration<>(true, baseCommandString,
-                "settings", "Open job settings", new String[0], (p, args) -> {
-            CustomGUIManager.openGUI(new JobProfileGUI(p, JobProfileTab.SETTINGS), p);
-            return true;
-        }));
-        // endregion
 
         // /unbound-jobs boss-bar-exp
         addPlayerCommand(new CommandDeclaration<>(baseCommandString,
@@ -175,14 +220,6 @@ public class UnboundJobsCommands extends ACommandExecutor {
                 return true;
             }));
         }
-
-        // /unbound-jobs list
-        if (jobListGUIEnabled)
-            addPlayerCommand(new CommandDeclaration<>(false, baseCommandString,
-                    "list", "Open up a list of available jobs", new String[0], (p, args) -> {
-                CustomGUIManager.openGUI(new JobListGUI(playersCanJoinJobsViaListGUI), p);
-                return true;
-            }));
 
         // /unbound-jobs join <job-name>
         addPlayerCommand(new CommandDeclaration<>(true, baseCommandString, "join",

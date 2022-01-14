@@ -47,6 +47,7 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
     private boolean joinJobsViaGUI;
     private boolean profilesArePublic;
     private DayOfWeek weeklyQuestRollDay;
+    private ProfileVisibility defaultProfileVisibility;
     //endregion
 
     private static WorkerManager instance;
@@ -100,6 +101,14 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
             weeklyQuestRollDay = DayOfWeek.valueOf(weeklyQuestRollDayString.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new InvalidConfigurationException("Plugin config has invalid property: " + "workers.weekly-quest-reroll-day");
+        }
+        // endregion
+        // region Default profile visibility
+        String defaultProfileVisibilityString = workersSection.getString("default-profile-visiblity", "private");
+        try {
+            defaultProfileVisibility = ProfileVisibility.valueOf(defaultProfileVisibilityString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidConfigurationException("Plugin config has invalid section: " + "workers.default-profile-visiblity");
         }
         // endregion
     }
