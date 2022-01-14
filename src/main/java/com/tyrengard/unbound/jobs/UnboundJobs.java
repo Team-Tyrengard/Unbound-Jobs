@@ -23,7 +23,7 @@ public class UnboundJobs extends AManagedPlugin {
         addManager(new JobManager(this));
         addManager(new WorkerManager(this));
 
-        addACommandExecutor(new UnboundJobsCommand(getConfig()), "unbound-jobs", "unbound-jobs-admin");
+        addACommandExecutor(new UnboundJobsCommands(getConfig()), "unbound-jobs", "unbound-jobs-admin");
     }
 
     @Override

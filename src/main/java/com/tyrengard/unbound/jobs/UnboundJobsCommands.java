@@ -24,7 +24,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-public class UnboundJobsCommand extends ACommandExecutor {
+public class UnboundJobsCommands extends ACommandExecutor {
     static final String adminBaseCommandString = "unbound-jobs-admin";
     static final String baseCommandString = "unbound-jobs";
 
@@ -33,7 +33,7 @@ public class UnboundJobsCommand extends ACommandExecutor {
             + StringUtils.padString(ChatColor.AQUA + "Unbound Jobs - Commands" + ChatColor.DARK_PURPLE, '-',
             StringUtils.MAX_CHAT_SIZE, StringUtils.StringPaddingOptions.CENTER) + SEPARATOR_RIGHT;
 
-    public UnboundJobsCommand(FileConfiguration config) {
+    public UnboundJobsCommands(FileConfiguration config) {
         super();
 
         Bukkit.getLogger().info("Adding /unbound-jobs-admin commands...");
@@ -57,9 +57,21 @@ public class UnboundJobsCommand extends ACommandExecutor {
     public void addAdminCommands() {
         // /unbound-jobs-admin reload
         addRegularCommand(new CommandDeclaration<>(false, adminBaseCommandString,
-                "reload", "Reload various UnboundJobs configs", new String[0], (sender, args) -> {
+                "reload", "Reload all UnboundJobs configs", new String[0], (sender, args) -> {
             UnboundJobs.getInstance().reloadPlugin();
             sender.sendMessage("Unbound Jobs reloaded.");
+            return true;
+        }));
+
+        // /unbound-jobs-admin jobs
+        addRegularCommand(new CommandDeclaration<>(adminBaseCommandString,
+                "jobs", null, new String[0]));
+
+        // /unbound-jobs-admin jobs reload
+        addRegularCommand(new CommandDeclaration<>(false, adminBaseCommandString,
+                "jobs reload", "Reload UnboundJobs job configs", new String[0], (sender, args) -> {
+            JobManager.loadJobConfigFiles();
+            sender.sendMessage("Unbound Jobs job configs reloaded.");
             return true;
         }));
 
