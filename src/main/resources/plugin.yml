@@ -3,7 +3,7 @@ version: 0.2
 main: com.tyrengard.unbound.jobs.UnboundJobs
 api-version: 1.18
 prefix: UnboundJobs
-depend: [ Aureycore, Vault ]
+depend: [ Aureycore, AureycoreGUIs, Vault ]
 authors: [ hayachikin ]
 description: Job system for the Unbound plugin pack for Havengarde
 website: unbound.tyrengard.com
