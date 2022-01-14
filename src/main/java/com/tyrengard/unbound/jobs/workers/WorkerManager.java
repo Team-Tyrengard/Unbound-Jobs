@@ -14,6 +14,7 @@ import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
+import com.tyrengard.unbound.jobs.workers.enums.ProfileVisibility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -43,9 +44,7 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
     private final Hashtable<UUID, Worker> workers = new Hashtable<>();
 
     //region Config values
-    private boolean jobListGUIEnabled;
-    private boolean joinJobsViaGUI;
-    private boolean profilesArePublic;
+    private int maxJobsPerPlayer;
     private DayOfWeek weeklyQuestRollDay;
     private ProfileVisibility defaultProfileVisibility;
     //endregion
@@ -78,20 +77,12 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
         if (workersSection == null)
             throw new InvalidConfigurationException("Plugin config has missing section: " + "workers");
 
-        // region Job list GUI enabled
-        if (!workersSection.isBoolean("job-list-gui-enabled"))
-            throw new InvalidConfigurationException("Plugin config has invalid section: " + "workers.job-list-gui-enabled");
-        jobListGUIEnabled = workersSection.getBoolean("job-list-gui-enabled");
-        // endregion
-        // region Join jobs via GUI
-        if (!workersSection.isBoolean("join-jobs-via-list-gui"))
-            throw new InvalidConfigurationException("Plugin config has invalid section: " + "workers.join-jobs-via-list-gui");
-        joinJobsViaGUI = workersSection.getBoolean("join-jobs-via-list-gui");
-        // endregion
-        // region Public profiles
-        if (!workersSection.isBoolean("public-profiles"))
-            throw new InvalidConfigurationException("Plugin config has invalid section: " + "workers.public-profiles");
-        profilesArePublic = workersSection.getBoolean("public-profiles");
+        // region Jobs limit per player
+        if (!workersSection.contains("job-limit-per-player"))
+            throw new InvalidConfigurationException("Plugin config is missing section: " + "workers.job-limit-per-player");
+        maxJobsPerPlayer = workersSection.getInt("job-limit-per-player");
+        if (maxJobsPerPlayer == 0)
+            throw new InvalidConfigurationException("Plugin config has invalid section: " + "workers.job-limit-per-player");
         // endregion
         // region Weekly job quest reroll day
         String weeklyQuestRollDayString = workersSection.getString("weekly-quest-reroll-day");
@@ -114,14 +105,13 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
     }
     // endregion
     // region Static methods
-    public static Worker obtainWorker(UUID id) {
+    public static @NotNull Worker obtainWorker(UUID id) {
         return Objects.requireNonNullElseGet(instance.workers.computeIfAbsent(id, instance::getObject),
                 () -> createNewWorker(id));
     }
 
     public static Worker createNewWorker(UUID id) {
-        // TODO: config should set default slots
-        Worker worker = new Worker(id);
+        Worker worker = new Worker(id, instance.defaultProfileVisibility);
         instance.workers.put(id, worker);
         instance.saveObject(worker);
         return worker;
@@ -130,6 +120,10 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
     public static void addJobToPlayer(Player p, Job j) {
         obtainWorker(p.getUniqueId()).setJobData(j, new JobData((short) 1, 0));
         p.sendMessage("Joined job " + j.getName() + ".");
+    }
+
+    public static int getMaxJobsPerPlayer() {
+        return instance.maxJobsPerPlayer;
     }
 
     public static void rollDailyQuest(@NotNull Worker worker, @NotNull Job job, int slot) {
@@ -221,14 +215,6 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
     public static Worker getActiveWorker(PersistentDataHolder pdh) {
         UUID id = pdh.getPersistentDataContainer().get(UJ_ACTIVE_WORKER_KEY, new UUIDDataType());
         return id == null ? null : WorkerManager.obtainWorker(id);
-    }
-
-    public static boolean canWorkersJoinJobsViaGUI() {
-        return instance.joinJobsViaGUI;
-    }
-
-    public static boolean isJobListGUIEnabled() {
-        return instance.jobListGUIEnabled;
     }
     // endregion
     // region Event listeners

@@ -47,7 +47,6 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
     // region Config values
     private short maxLevel;
     private List<String> disabledJobIds;
-    private int maxJobsPerPlayer;
     private boolean experienceBoostsEnabled;
     private int[] experienceTable;
     private boolean incomeBoostsEnabled;
@@ -115,11 +114,6 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
         if (tempMaxLevel > Short.MAX_VALUE)
             throw new InvalidConfigurationException("Highest max job level supported is " + Short.MAX_VALUE);
         maxLevel = (short) tempMaxLevel;
-        // endregion
-        // region Jobs limit per player
-        if (!jobsSection.contains("limit-per-player"))
-            throw new InvalidConfigurationException("Plugin config is missing section: " + "limit-per-player");
-        maxJobsPerPlayer = jobsSection.getInt("limit-per-player");
         // endregion
         // region Experience
         DoubleEvaluator eval = new DoubleEvaluator();
@@ -206,10 +200,6 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
 
     public static short getMaxLevel() {
         return instance.maxLevel;
-    }
-
-    public static int getMaxJobsPerPlayer() {
-        return instance.maxJobsPerPlayer;
     }
 
     public static void registerJobQuestReward(@NotNull JobQuestRewardType jobQuestRewardType) throws UnboundJobsException {

@@ -29,14 +29,8 @@ commands:
 
 # Config options for players
 workers:
-  # Enable/disable players bringing up the job list GUI.
-  job-list-gui-enabled: true
-
-  # Enable/disable players joining jobs through the "/jobs list" GUI.
-  join-jobs-via-list-gui: true
-
-  # Enable/disable players viewing the job profile of others using the "/jobs profile <player-name>" command.
-  public-profiles: true
+  # Set a job limit for every player. 0 is not allowed. Set to -1 to disable limit.
+  job-limit-per-player: -1
 
   # Weekly job quest reroll day.
   # Allowed values: sunday, monday, tuesday, wednesday, thursday, friday, saturday
@@ -57,9 +51,6 @@ jobs:
 
   # Supported values: 1-32767
   max-level: 100
-
-  # Set a job limit for every player. Set to -1 to disable limit.
-  limit-per-player: -1
 
   experience:
     # Enable/disable experience boosts.

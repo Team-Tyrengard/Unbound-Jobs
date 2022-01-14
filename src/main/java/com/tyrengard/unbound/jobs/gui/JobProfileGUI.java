@@ -16,6 +16,7 @@ import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -66,15 +67,24 @@ public class JobProfileGUI extends ACustomChestGUI {
         //region Content for Jobs tab
         switch (tab) {
             case JOBS -> {
-                int jobSlots = JobManager.getMaxJobsPerPlayer();
+                int jobSlots = WorkerManager.getMaxJobsPerPlayer();
                 Iterator<Job> jobIterator = worker.getJobs().iterator();
+                if (!jobIterator.hasNext())
+                    break;
+
                 for (int index = 10; index < 45; index++) {
                     if (index % 9 == 0 || index % 9 == 8)
                         continue;
 
-                    if (jobIterator.hasNext()) {
-                        Job job = jobIterator.next();
-                        contents[index] = getButtonForJob(job, worker.getJobData(job));
+                    Job job;
+                    JobData jobData;
+                    do {
+                        job = jobIterator.next();
+                        jobData = worker.getJobData(job);
+                    } while (jobIterator.hasNext() && jobData == null);
+
+                    if (jobData != null) {
+                        contents[index] = getButtonForJob(job, jobData);
                     } else if (jobSlots == -1) {
                         continue;
                     } else if (jobSlots > 0) {
