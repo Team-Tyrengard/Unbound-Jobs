@@ -10,6 +10,7 @@ import dev.morphia.annotations.AlsoLoad;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,17 +51,11 @@ public final class Worker {
 
     public String getPlayerName() { return Bukkit.getOfflinePlayer(id).getName(); }
 
-    private HashMap<String, JobData> getJobDataMap() {
-        if (jobData == null)
-            jobData = new HashMap<>();
-        return jobData;
-    }
-
-    public List<Job> getJobs() {
+    public @NotNull List<Job> getJobs() {
         return getJobDataMap().keySet().stream().map(JobManager::getJob).filter(Objects::nonNull).toList();
     }
 
-    public JobData getJobData(Job j) {
+    public @Nullable JobData getJobData(Job j) {
         return getJobDataMap().get(j.getId());
     }
 
@@ -68,18 +63,12 @@ public final class Worker {
         getJobDataMap().put(j.getId(), jd);
     }
 
-    public boolean hasJob(Job j) {
+    public boolean hasJob(@NotNull Job j) {
         return getJobDataMap().containsKey(j.getId());
     }
 
     public void removeJob(Job j) {
         getJobDataMap().remove(j.getId());
-    }
-
-    private @NotNull HashMap<String, JobQuestData> getJobQuestData() {
-        if (jobQuestData == null)
-            jobQuestData = new HashMap<>();
-        return jobQuestData;
     }
 
     public @NotNull JobQuestData getJobQuestData(Job j) {
@@ -100,7 +89,7 @@ public final class Worker {
             jobQuestData.setWeeklyQuest(jobQuest, slot);
     }
 
-    public LocalDate getLastQuestRefreshDate() {
+    public @Nullable LocalDate getLastQuestRefreshDate() {
         return lastQuestRefreshDate;
     }
 
@@ -108,11 +97,23 @@ public final class Worker {
         this.lastQuestRefreshDate = lastQuestRefreshDate;
     }
 
-    public BossBarExpIndicatorSetting getBossBarExpIndicatorSetting() {
+    public @NotNull BossBarExpIndicatorSetting getBossBarExpIndicatorSetting() {
         return bossBarExpIndicatorSetting == null ? BossBarExpIndicatorSetting.DEFAULT : bossBarExpIndicatorSetting;
     }
 
     public void setBossBarExpIndicatorSetting(BossBarExpIndicatorSetting bossBarExpIndicatorSetting) {
         this.bossBarExpIndicatorSetting = bossBarExpIndicatorSetting;
+    }
+
+    private @NotNull HashMap<String, JobData> getJobDataMap() {
+        if (jobData == null)
+            jobData = new HashMap<>();
+        return jobData;
+    }
+
+    private @NotNull HashMap<String, JobQuestData> getJobQuestData() {
+        if (jobQuestData == null)
+            jobQuestData = new HashMap<>();
+        return jobQuestData;
     }
 }

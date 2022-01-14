@@ -14,7 +14,6 @@ import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -42,7 +41,6 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
     private static NamespacedKey UJ_ACTIVE_WORKER_KEY;
 
     private final Hashtable<UUID, Worker> workers = new Hashtable<>();
-    private Economy economy;
 
     //region Config values
     private boolean jobListGUIEnabled;
@@ -62,14 +60,7 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
     // region Manager overrides
     @Override
     protected void startup() {
-        RegisteredServiceProvider<Economy> ecoRSP = plugin.getServer().getServicesManager().getRegistration(Economy.class);
-        if (ecoRSP == null) {
-            // NO ECONOMY
-            logWarning("No economy plugin detected!");
-            economy = null;
-        } else {
-            economy = ecoRSP.getProvider();
-        }
+
     }
 
     @Override
@@ -181,6 +172,9 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
 
     public static void giveJobExperience(Worker worker, Job job, int exp) {
         JobData jobData = worker.getJobData(job);
+        if (jobData == null)
+            return;
+
         short currentLevel = jobData.level(), nextLevel = (short) (currentLevel + 1), maxLevel = JobManager.getMaxLevel();
         if (nextLevel <= maxLevel) {
             int expToLevelUp = JobManager.getExperienceForNextLevel(currentLevel),
@@ -213,13 +207,6 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
             if (shouldPresent)
                 presentExpBar(worker, job);
         }
-    }
-
-    public static boolean economyExists() { return instance.economy != null; }
-
-    public static void payWorker(Worker worker, double amount) {
-        if (instance.economy != null)
-            instance.economy.depositPlayer(Bukkit.getOfflinePlayer(worker.getId()), amount);
     }
 
     public static Worker getActiveWorker(PersistentDataHolder pdh) {
@@ -260,6 +247,9 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
 
     private static void presentExpBar(Worker w, Job j) {
         JobData jobData = w.getJobData(j);
+        if (jobData == null)
+            return;
+
         int expForNextLevel = JobManager.getExperienceForNextLevel(jobData.level());
 
         BossBarUtils.addBossBarForPlayer(UnboundJobs.getInstance(), "exp-bar",

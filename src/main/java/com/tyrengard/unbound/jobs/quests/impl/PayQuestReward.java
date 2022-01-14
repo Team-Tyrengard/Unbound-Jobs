@@ -1,9 +1,10 @@
 package com.tyrengard.unbound.jobs.quests.impl;
 
 import com.tyrengard.unbound.jobs.quests.JobQuestReward;
-import com.tyrengard.unbound.jobs.workers.Worker;
-import com.tyrengard.unbound.jobs.workers.WorkerManager;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 public class PayQuestReward implements JobQuestReward {
     private final double payAmount;
@@ -14,7 +15,8 @@ public class PayQuestReward implements JobQuestReward {
 
     @Override
     public void awardToPlayer(Player p) {
-        Worker worker = WorkerManager.obtainWorker(p.getUniqueId());
-        WorkerManager.payWorker(worker, payAmount);
+        RegisteredServiceProvider<Economy> ecoRSP = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
+        if (ecoRSP != null)
+            ecoRSP.getProvider().depositPlayer(p, payAmount);
     }
 }

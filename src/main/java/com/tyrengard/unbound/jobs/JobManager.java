@@ -19,6 +19,7 @@ import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.JobTask;
 import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -28,6 +29,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +42,7 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
     private final TreeMap<String, Job> jobs = new TreeMap<>();
     private final HashMap<String, JobQuestRewardType> jobQuestRewardTypes;
     private final File pluginDataFolder;
+    private Economy economy;
 
     // region Config values
     private short maxLevel;
@@ -68,6 +71,16 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
     // region Manager overrides
     @Override
     protected void startup() {
+        // region Setup economy
+        RegisteredServiceProvider<Economy> ecoRSP = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+        if (ecoRSP == null) {
+            logWarning("No economy plugin detected!");
+            economy = null;
+        } else {
+            economy = ecoRSP.getProvider();
+        }
+        // endregion
+        // region Add default job quests
         for (JobQuestRewardType type : JobQuestRewardType.Default.values()) {
             try {
                 registerJobQuestReward(type);
@@ -75,30 +88,8 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
                 e.printStackTrace();
             }
         }
-
-        if (!pluginDataFolder.exists())
-            logError("Plugin data folder not found! No jobs will be added.");
-
-        try {
-            Files.walk(pluginDataFolder.toPath()).filter(Files::isRegularFile)
-                .filter(path -> !path.endsWith("config.yml") && path.toString().endsWith(".yml"))
-                .forEach(path -> {
-                    try {
-                        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(path.toFile());
-                        logDebug("Parsing job from " + path.getFileName().toString());
-                        Job job = new Job(yamlConfiguration);
-                        jobs.put(job.getId(), job);
-                        logDebug("Added job \"" + job.getName() + "\": " + job.getJobTasks().size() + " tasks, " +
-                                job.getJobQuests(JobQuestType.DAILY).size() + " daily quests," +
-                                job.getJobQuests(JobQuestType.WEEKLY).size() + " weekly quests");
-                    } catch (Exception e) {
-                        logError("Unable to add job from file " + path.getFileName().toString() + " due to the following error:");
-                        logError(e.getMessage());
-                    }
-                });
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
+        // endregion
+        loadJobConfigFiles();
     }
 
     @Override
@@ -179,6 +170,34 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
     }
     // endregion
 
+    public static void loadJobConfigFiles() {
+        if (!instance.pluginDataFolder.exists())
+            instance.logError("Plugin data folder not found! No jobs will be added.");
+
+        try {
+            Files.walk(instance.pluginDataFolder.toPath()).filter(Files::isRegularFile)
+                    .filter(path -> !path.endsWith("config.yml") && path.toString().endsWith(".yml"))
+                    .forEach(path -> {
+                        try {
+                            YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(path.toFile());
+                            instance.logDebug("Parsing job from " + path.getFileName().toString());
+                            Job job = new Job(yamlConfiguration);
+                            instance.jobs.put(job.getId(), job);
+                            instance.logDebug("Loaded config for job \"" + job.getName() + "\": " +
+                                    job.getJobTasks().size() + " tasks, " +
+                                    job.getJobQuests(JobQuestType.DAILY).size() + " daily quests," +
+                                    job.getJobQuests(JobQuestType.WEEKLY).size() + " weekly quests");
+                        } catch (Exception e) {
+                            instance.logError("Unable to add job from file " + path.getFileName().toString() +
+                                    " due to the following error:");
+                            instance.logError(e.getMessage());
+                        }
+                    });
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+    }
+
     public static Collection<Job> getJobs() { return instance.jobs.values(); }
 
     public static Job getJob(String jobId) {
@@ -215,17 +234,9 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
         // TODO: calculate exp properly (i.e. with bonuses and multipliers)
         WorkerManager.giveJobExperience(w, j, t.getBaseExp());
 
-        // region Pay
-        if (WorkerManager.economyExists()) {
-            DoubleEvaluator eval = new DoubleEvaluator();
-            StaticVariableSet<Double> variables = new StaticVariableSet<>();
-            // TODO: calculate pay properly (i.e. with bonuses and multipliers)
-            variables.set("p", t.getBasePay());
-            variables.set("j", (double) w.getJobData(j).level());
-            variables.set("M", (double) maxLevel);
-            WorkerManager.payWorker(w, eval.evaluate(incomeFormula, variables));
-        }
-        // endregion
+        JobData jobData = w.getJobData(j);
+        if (jobData != null)
+            payWorker(w, jobData.level(), t.getBasePay());
     }
 
     @EventHandler
@@ -258,4 +269,19 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
         }
     }
     // endregion
+
+    private void payWorker(Worker worker, short jobLevel, double basePay) {
+        if (economy == null)
+            return;
+
+        DoubleEvaluator eval = new DoubleEvaluator();
+        StaticVariableSet<Double> variables = new StaticVariableSet<>();
+        variables.set("p", basePay);
+        variables.set("j", (double) jobLevel);
+        variables.set("M", (double) maxLevel);
+
+        // TODO: calculate pay properly (i.e. with bonuses and multipliers)
+        double totalPay = eval.evaluate(incomeFormula, variables);
+        economy.depositPlayer(Bukkit.getOfflinePlayer(worker.getId()), totalPay);
+    }
 }

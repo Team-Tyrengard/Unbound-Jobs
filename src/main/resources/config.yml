@@ -50,7 +50,8 @@ jobs:
     # Active timed boosts will be paused.
     boosts-enabled: true
 
-    # Formula to use for computing experience. Result is rounded because experience is an integer value.
+    # Formula to use for computing experience needed to reach a specific level.
+    # Result is rounded because experience is an integer value.
     # Allowed variables:
     # t - target level
     formula: ((t - 1) / 0.5) ^ 1.75
