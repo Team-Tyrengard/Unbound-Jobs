@@ -1,12 +1,15 @@
 package com.tyrengard.unbound.jobs.actions;
 
+import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.quests.JobQuest;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.JobTask;
 import com.tyrengard.unbound.jobs.actions.impl.*;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface Action {
@@ -29,6 +33,7 @@ public interface Action {
         CATCH_FISH,
         CRAFT_ITEM,
         GATHER_FROM_ANIMAL,
+        SHEAR_ANIMAL,
         HARVEST_PLANT,
         KILL_MOB,
         PLACE_BLOCK,
@@ -58,29 +63,19 @@ public interface Action {
             int baseExp = Integer.parseInt(taskStringArray[3]);
 
             return switch (this) {
-                case BREAK_BLOCK -> new BreakBlockAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
+                case BREAK_BLOCK, PLACE_BLOCK, SOW_PLANT -> new BlockBased.BaseJobTask(this, Arrays.stream(taskAcceptedThings)
                         .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-                case BREED_ANIMAL -> new BreedAnimalAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
+                case CATCH_FISH, CRAFT_ITEM, HARVEST_PLANT -> new ItemStackBased.BaseJobTask(this, Arrays.stream(taskAcceptedThings)
+                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
+                case BREED_ANIMAL, KILL_MOB -> new EntityBased.BaseJobTask(this, Arrays.stream(taskAcceptedThings)
                         .map(String::toUpperCase).map(EntityType::valueOf).collect(Collectors.toSet()), source, basePay, baseExp);
 //                case BREW_POTION -> new BrewPotionAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
 //                        .map(String::toUpperCase).map(PotionType::valueOf).collect(Collectors.toSet()), source, basePay, baseExp);
-                case CATCH_FISH -> new CatchFishAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-                case CRAFT_ITEM -> new CraftItemAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-//                case "gather_animal" -> new GatherFromAnimalTask(Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
+//                case GATHER_FROM_ANIMAL -> new GatherFromAnimalTask(Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
 //                        .map(Material::matchMaterial).collect(Collectors.toSet()), this, basePay, baseExp);
-                case HARVEST_PLANT -> new HarvestPlantAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-                case KILL_MOB -> new KillMobAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
-                        .map(EntityType::valueOf).collect(Collectors.toSet()), source, basePay, baseExp);
-                case PLACE_BLOCK -> new PlaceBlockAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
 //            case REPAIR_ITEM ->
 //            case SMELT_ITEM -> new PlaceBlockTask(Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
 //                    .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-            case SOW_PLANT -> new SowPlantAction.JOB_TASK(this, Arrays.stream(taskAcceptedThings)
-                    .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
                 default -> null;
             };
         }
@@ -92,30 +87,20 @@ public interface Action {
             int baseExp = (Integer) map.get("base-exp");
             List<String> acceptsList = (List<String>) map.get("accepts");
             return switch (this) {
-                case BREAK_BLOCK -> new BreakBlockAction.JOB_TASK(this, acceptsList.stream()
+                case BREAK_BLOCK, PLACE_BLOCK, SOW_PLANT -> new BlockBased.BaseJobTask(this, acceptsList.stream()
                         .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-                case BREED_ANIMAL -> new BreedAnimalAction.JOB_TASK(this, acceptsList.stream().map(String::toUpperCase)
+                case CATCH_FISH, CRAFT_ITEM, HARVEST_PLANT -> new ItemStackBased.BaseJobTask(this, acceptsList.stream()
+                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
+                case BREED_ANIMAL, KILL_MOB -> new EntityBased.BaseJobTask(this, acceptsList.stream().map(String::toUpperCase)
                         .map(EntityType::valueOf).collect(Collectors.toSet()), source, basePay, baseExp);
 //                case BREW_POTION -> new BrewPotionAction.JOB_TASK(this, acceptsList.stream()
 //                        .map(String::toUpperCase).map(PotionType::valueOf).collect(Collectors.toSet()), source, basePay, baseExp);
-                case CATCH_FISH -> new CatchFishAction.JOB_TASK(this, acceptsList.stream()
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-                case CRAFT_ITEM -> new CraftItemAction.JOB_TASK(this, acceptsList.stream()
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
 //                    case GATHER_ANIMAL -> {
 //                    }
-                case HARVEST_PLANT -> new HarvestPlantAction.JOB_TASK(this, acceptsList.stream()
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-                case KILL_MOB -> new KillMobAction.JOB_TASK(this, acceptsList.stream().map(String::toUpperCase)
-                        .map(EntityType::valueOf).collect(Collectors.toSet()), source, basePay, baseExp);
-                case PLACE_BLOCK -> new PlaceBlockAction.JOB_TASK(this, acceptsList.stream()
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
 //                    case REPAIR_ITEM -> {
 //                    }
 //                    case SMELT_ITEM -> {
 //                    }
-                case SOW_PLANT -> new SowPlantAction.JOB_TASK(this, acceptsList.stream()
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
                 default -> null;
             };
         }
@@ -136,29 +121,85 @@ public interface Action {
             int amount = Integer.parseInt(taskStringArray[2]);
 
             return switch (this) {
-                case BREAK_BLOCK -> new BreakBlockAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, amount);
-                case BREED_ANIMAL -> new BreedAnimalAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
-                        .map(EntityType::valueOf).collect(Collectors.toSet()), source, amount);
+                case BREAK_BLOCK -> new BlockBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(Material::matchMaterial).collect(Collectors.toSet()),
+                        source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Break " + currentProgress + " / " + getProgressRequired() + " " + materials.stream()
+                                .map(Material::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
+                case BREED_ANIMAL -> new EntityBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(String::toUpperCase).map(EntityType::valueOf)
+                                .collect(Collectors.toSet()), source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Breed " + currentProgress + " / " + getProgressRequired() + " " + entityTypes.stream()
+                                .map(EntityType::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
 //                case BREW_POTION -> new BrewPotionAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings)
 //                        .map(String::toUpperCase).map(PotionType::valueOf).collect(Collectors.toSet()), source, amount);
-                case CATCH_FISH -> new CatchFishAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, amount);
-                case CRAFT_ITEM -> new CraftItemAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, amount);
+                case CATCH_FISH -> new ItemStackBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(Material::matchMaterial).collect(Collectors.toSet()),
+                        source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Catch " + currentProgress + " / " + getProgressRequired() + " " + materials.stream()
+                                .map(Material::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
+                case CRAFT_ITEM -> new ItemStackBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(Material::matchMaterial).collect(Collectors.toSet()),
+                        source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Craft " + currentProgress + " / " + getProgressRequired() + " " + materials.stream()
+                                .map(Material::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
 //                case "gather_animal" -> new GatherFromAnimalTask(Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
 //                        .map(Material::matchMaterial).collect(Collectors.toSet()), this, basePay, baseExp);
-                case HARVEST_PLANT -> new HarvestPlantAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, amount);
-                case KILL_MOB -> new KillMobAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
-                        .map(EntityType::valueOf).collect(Collectors.toSet()), source, amount);
-                case PLACE_BLOCK -> new PlaceBlockAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, amount);
+                case HARVEST_PLANT -> new BlockBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(Material::matchMaterial).collect(Collectors.toSet()),
+                        source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Harvest " + currentProgress + " / " + getProgressRequired() + " " + materials.stream()
+                                .map(Material::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
+                case KILL_MOB -> new EntityBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
+                                .map(EntityType::valueOf).collect(Collectors.toSet()), source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Kill " + currentProgress + " / " + getProgressRequired() + " " + entityTypes.stream()
+                                .map(EntityType::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
+                case PLACE_BLOCK -> new BlockBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(Material::matchMaterial).collect(Collectors.toSet()),
+                        source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Place " + currentProgress + " / " + getProgressRequired() + " " + materials.stream()
+                                .map(Material::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
 //            case REPAIR_ITEM ->
 //            case SMELT_ITEM -> new PlaceBlockTask(Arrays.stream(taskAcceptedThings).map(String::toUpperCase)
 //                    .map(Material::matchMaterial).collect(Collectors.toSet()), source, basePay, baseExp);
-                case SOW_PLANT -> new SowPlantAction.JOB_QUEST_TASK(jobQuestTaskId, this, Arrays.stream(taskAcceptedThings)
-                        .map(Material::matchMaterial).collect(Collectors.toSet()), source, amount);
+                case SOW_PLANT -> new BlockBased.BaseJobQuestTask(jobQuestTaskId, this,
+                        Arrays.stream(taskAcceptedThings).map(Material::matchMaterial).collect(Collectors.toSet()),
+                        source, amount) {
+                    @Override
+                    public String getStatusString(int currentProgress) {
+                        return "Plant " + currentProgress + " / " + getProgressRequired() + " " + materials.stream()
+                                .map(Material::toString).map(StringUtils::toTitleCase).collect(Collectors.joining(" OR "));
+                    }
+                };
                 default -> null;
             };
         }

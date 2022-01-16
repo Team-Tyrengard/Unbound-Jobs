@@ -1,6 +1,7 @@
 package com.tyrengard.unbound.jobs.events;
 
 import com.tyrengard.unbound.jobs.actions.Action;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -24,44 +25,62 @@ public class PlayerPerformActionEvent extends PlayerEvent {
     }
     // endregion
 
+    private final World world;
     private final Action action;
     private final ItemStack itemStack;
     private final Block block;
     private final Entity entity;
 
     public PlayerPerformActionEvent(Player player, Action action, ItemStack itemStack) {
-        this(player, action, itemStack, null, null);
+        this(player.getWorld(), player, action, itemStack, null, null);
     }
 
     public PlayerPerformActionEvent(Player player, Action action, Block block) {
-        this(player, action, null, block, null);
+        this(player.getWorld(), player, action, null, block, null);
     }
 
     public PlayerPerformActionEvent(Player player, Action action, Entity entity) {
-        this(player, action, null, null, entity);
+        this(player.getWorld(), player, action, null, null, entity);
     }
 
-    protected PlayerPerformActionEvent(Player player, Action action, ItemStack itemStack, Block block, Entity entity) {
+    public PlayerPerformActionEvent(World world, Player player, Action action, ItemStack itemStack) {
+        this(world, player, action, itemStack, null, null);
+    }
+
+    public PlayerPerformActionEvent(World world, Player player, Action action, Block block) {
+        this(world, player, action, null, block, null);
+    }
+
+    public PlayerPerformActionEvent(World world, Player player, Action action, Entity entity) {
+        this(world, player, action, null, null, entity);
+    }
+
+    protected PlayerPerformActionEvent(World world, Player player, Action action, ItemStack itemStack, Block block, Entity entity) {
         super(player);
+        this.world = world;
         this.action = action;
         this.itemStack = itemStack;
         this.block = block;
         this.entity = entity;
     }
 
-    public Action getAction() {
+    public @NotNull World getWorld() {
+        return world;
+    }
+
+    public @NotNull Action getAction() {
         return action;
     }
 
-    public ItemStack getItemStack() {
+    public @NotNull ItemStack getItemStack() {
         return itemStack;
     }
 
-    public Block getBlock() {
+    public @NotNull Block getBlock() {
         return block;
     }
 
-    public Entity getEntity() {
+    public @NotNull Entity getEntity() {
         return entity;
     }
 }
