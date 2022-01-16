@@ -2,8 +2,8 @@ package com.tyrengard.unbound.jobs;
 
 import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.actions.Action;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
+import com.tyrengard.unbound.jobs.quests.JobQuest;
+import com.tyrengard.unbound.jobs.quests.JobQuestType;
 import com.tyrengard.unbound.jobs.tasks.JobTask;
 import com.tyrengard.unbound.jobs.tasks.TaskSource;
 import org.bukkit.Material;

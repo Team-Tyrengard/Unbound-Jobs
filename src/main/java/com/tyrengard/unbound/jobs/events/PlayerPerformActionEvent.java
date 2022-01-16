@@ -4,15 +4,15 @@ import com.tyrengard.unbound.jobs.actions.Action;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Called when a player performs a possible task.
  */
-public class TaskPerformEvent extends Event {
+public class PlayerPerformActionEvent extends PlayerEvent {
     // region Base event components
     private static final HandlerList handlers = new HandlerList();
     @Override
@@ -24,37 +24,32 @@ public class TaskPerformEvent extends Event {
     }
     // endregion
 
-    private final Player player;
     private final Action action;
     private final ItemStack itemStack;
     private final Block block;
     private final Entity entity;
 
-    public TaskPerformEvent(Player player, Action action, ItemStack itemStack) {
+    public PlayerPerformActionEvent(Player player, Action action, ItemStack itemStack) {
         this(player, action, itemStack, null, null);
     }
 
-    public TaskPerformEvent(Player player, Action action, Block block) {
+    public PlayerPerformActionEvent(Player player, Action action, Block block) {
         this(player, action, null, block, null);
     }
 
-    public TaskPerformEvent(Player player, Action action, Entity entity) {
+    public PlayerPerformActionEvent(Player player, Action action, Entity entity) {
         this(player, action, null, null, entity);
     }
 
-    protected TaskPerformEvent(Player player, Action action, ItemStack itemStack, Block block, Entity entity) {
-        this.player = player;
+    protected PlayerPerformActionEvent(Player player, Action action, ItemStack itemStack, Block block, Entity entity) {
+        super(player);
         this.action = action;
         this.itemStack = itemStack;
         this.block = block;
         this.entity = entity;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
-    public Action getTaskType() {
+    public Action getAction() {
         return action;
     }
 

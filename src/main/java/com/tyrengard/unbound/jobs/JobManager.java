@@ -4,17 +4,15 @@ import com.fathzer.soft.javaluator.DoubleEvaluator;
 import com.fathzer.soft.javaluator.StaticVariableSet;
 import com.tyrengard.aureycore.foundation.AManager;
 import com.tyrengard.aureycore.foundation.Configured;
-import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
-import com.tyrengard.unbound.jobs.enums.PaymentPeriod;
-import com.tyrengard.unbound.jobs.events.JobQuestTaskPerformEvent;
-import com.tyrengard.unbound.jobs.events.JobTaskPerformEvent;
+import com.tyrengard.unbound.jobs.events.PlayerPerformJobQuestTaskEvent;
+import com.tyrengard.unbound.jobs.events.PlayerPerformJobTaskEvent;
 import com.tyrengard.unbound.jobs.exceptions.UnboundJobsException;
 import com.tyrengard.unbound.jobs.quests.JobQuestReward;
 import com.tyrengard.unbound.jobs.quests.JobQuestRewardType;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.quests.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestInstance;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
+import com.tyrengard.unbound.jobs.quests.JobQuestType;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.JobTask;
 import com.tyrengard.unbound.jobs.workers.Worker;
@@ -50,7 +48,6 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
     private boolean experienceBoostsEnabled;
     private int[] experienceTable;
     private boolean incomeBoostsEnabled;
-    private PaymentPeriod paymentPeriod;
     private String incomeFormula;
     // endregion
 
@@ -146,15 +143,6 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
             throw new InvalidConfigurationException("Plugin config has invalid section: " + "jobs.income.boosts");
         incomeBoostsEnabled = incomeSection.getBoolean("boosts-enabled");
         // endregion
-        // region Payment period
-        if (!incomeSection.isString("payment-period"))
-            throw new InvalidConfigurationException("Plugin config has invalid property: " + "jobs.income.payment-period");
-        try {
-            paymentPeriod = PaymentPeriod.valueOf(StringUtils.toKeyCase(incomeSection.getString("payment-period")));
-        } catch (IllegalArgumentException e) {
-            throw new InvalidConfigurationException("Plugin config has invalid property: " + "jobs.income.payment-period");
-        }
-        // endregion
         // region Formula
         if (!incomeSection.isString("formula"))
             throw new InvalidConfigurationException("Plugin config has invalid property: " + "jobs.income.formula");
@@ -176,6 +164,8 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
                             YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(path.toFile());
                             instance.logDebug("Parsing job from " + path.getFileName().toString());
                             Job job = new Job(yamlConfiguration);
+                            if (instance.disabledJobIds.contains(job.getId()))
+                                instance.logWarning("Job " + job.getName() + " is disabled.");
                             instance.jobs.put(job.getId(), job);
                             instance.logDebug("Loaded config for job \"" + job.getName() + "\": " +
                                     job.getJobTasks().size() + " tasks, " +
@@ -216,22 +206,19 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
 
     // region Event handlers
     @EventHandler
-    private void onJobTaskPerform(JobTaskPerformEvent e) {
-        Worker w = e.getWorker();
+    private void onCompleteJobTask(PlayerPerformJobTaskEvent e) {
+        Player p = e.getPlayer();
         JobTask t = e.getTask();
         Job j = t.getSource();
 
         // TODO: calculate exp properly (i.e. with bonuses and multipliers)
-        WorkerManager.giveJobExperience(w, j, t.getBaseExp());
-
-        JobData jobData = w.getJobData(j);
-        if (jobData != null)
-            payWorker(w, jobData.level(), t.getBasePay());
+        WorkerManager.giveJobExperience(p, j, t.getBaseExp());
+        payPlayer(p, e.getPlayerLevel(), t.getBasePay());
     }
 
     @EventHandler
-    private void onJobQuestTaskPerform(JobQuestTaskPerformEvent e) throws UnboundJobsException {
-        Worker w = e.getWorker();
+    private void onJobQuestTaskPerform(PlayerPerformJobQuestTaskEvent e) throws UnboundJobsException {
+        Worker w = WorkerManager.obtainWorker(e.getPlayer().getUniqueId());
         JobQuestTask t = e.getTask();
         JobQuest jq = t.getSource();
         Job j = jq.getJob();
@@ -260,7 +247,7 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
     }
     // endregion
 
-    private void payWorker(Worker worker, short jobLevel, double basePay) {
+    private void payPlayer(Player player, short jobLevel, double basePay) {
         if (economy == null)
             return;
 
@@ -272,6 +259,6 @@ public final class JobManager extends AManager<UnboundJobs> implements Listener,
 
         // TODO: calculate pay properly (i.e. with bonuses and multipliers)
         double totalPay = eval.evaluate(incomeFormula, variables);
-        economy.depositPlayer(Bukkit.getOfflinePlayer(worker.getId()), totalPay);
+        economy.depositPlayer(player, totalPay);
     }
 }

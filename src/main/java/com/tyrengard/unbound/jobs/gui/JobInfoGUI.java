@@ -1,7 +1,7 @@
 package com.tyrengard.unbound.jobs.gui;
 
-import com.tyrengard.aureycore.customguis.ACustomChestGUI;
-import com.tyrengard.aureycore.customguis.CustomGUIUtil;
+import com.tyrengard.aureycore.guis.ACustomChestGUI;
+import com.tyrengard.aureycore.guis.CustomGUIUtil;
 import com.tyrengard.unbound.jobs.Job;
 import org.bukkit.inventory.ItemStack;
 
@@ -26,6 +26,8 @@ public final class JobInfoGUI extends ACustomChestGUI {
     @Override
     protected ItemStack[] getContents(int page) {
         ItemStack[] content = CustomGUIUtil.getSpacerContent(54);
+
+
 
         return content;
     }

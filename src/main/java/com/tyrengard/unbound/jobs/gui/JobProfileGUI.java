@@ -1,14 +1,14 @@
 package com.tyrengard.unbound.jobs.gui;
 
-import com.tyrengard.aureycore.customguis.ACustomChestGUI;
-import com.tyrengard.aureycore.customguis.Button;
-import com.tyrengard.aureycore.customguis.CustomGUIUtil;
-import com.tyrengard.aureycore.customguis.Information;
+import com.tyrengard.aureycore.guis.ACustomChestGUI;
+import com.tyrengard.aureycore.guis.Button;
+import com.tyrengard.aureycore.guis.CustomGUIUtil;
+import com.tyrengard.aureycore.guis.Information;
 import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.JobData;
 import com.tyrengard.unbound.jobs.JobManager;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.quests.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestInstance;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
@@ -16,7 +16,6 @@ import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;

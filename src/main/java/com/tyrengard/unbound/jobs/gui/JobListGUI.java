@@ -1,9 +1,9 @@
 package com.tyrengard.unbound.jobs.gui;
 
-import com.tyrengard.aureycore.customguis.ACustomChestGUI;
-import com.tyrengard.aureycore.customguis.Button;
-import com.tyrengard.aureycore.customguis.CustomGUIManager;
-import com.tyrengard.aureycore.customguis.CustomGUIUtil;
+import com.tyrengard.aureycore.guis.ACustomChestGUI;
+import com.tyrengard.aureycore.guis.Button;
+import com.tyrengard.aureycore.guis.CustomGUIManager;
+import com.tyrengard.aureycore.guis.CustomGUIUtil;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.JobManager;
 import org.bukkit.ChatColor;

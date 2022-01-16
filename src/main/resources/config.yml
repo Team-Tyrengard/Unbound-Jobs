@@ -68,12 +68,6 @@ jobs:
     # Active timed boosts will be paused.
     boosts-enabled: true
 
-    # Specifies when players get paid for the tasks they complete in their jobs.
-    # Allowed values:
-    #   per_day   - per in-game day, income will appear in chat
-    #   per_task  - upon completion of task
-    payment-period: per_task
-
     # Formula to use for computing income from tasks.
     # Allowed variables:
     # M - max job level

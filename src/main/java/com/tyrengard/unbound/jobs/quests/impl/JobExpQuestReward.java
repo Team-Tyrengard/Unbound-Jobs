@@ -17,7 +17,6 @@ public class JobExpQuestReward implements JobQuestReward {
 
     @Override
     public void awardToPlayer(Player p) {
-        Worker worker = WorkerManager.obtainWorker(p.getUniqueId());
-        WorkerManager.giveJobExperience(worker, job, expAmount);
+        WorkerManager.giveJobExperience(p, job, expAmount);
     }
 }

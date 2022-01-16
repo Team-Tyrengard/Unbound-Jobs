@@ -1,5 +1,5 @@
 # Unbound Jobs
-Unbound Jobs is a job plugin for Spigot servers. It was originally started as a plugin specifically built for the Tyrengard server to replace Jobs Reborn by Zrips, but we decided to release it to the public as open-source.
+Unbound Jobs is a job plugin for Spigot servers. It was originally started as a plugin specifically built for the Tyrengard server to replace Jobs Reborn by Zrips and McMMO by Nossr50, but we decided to release it to the public as open-source.
 
 ## Features
 --- under construction ---

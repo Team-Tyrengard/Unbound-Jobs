@@ -4,9 +4,12 @@ import com.tyrengard.aureycore.foundation.AManager;
 import com.tyrengard.aureycore.foundation.Configured;
 import com.tyrengard.aureycore.foundation.common.utils.InventoryUtils;
 import com.tyrengard.unbound.jobs.actions.Action;
-import com.tyrengard.unbound.jobs.events.JobQuestTaskPerformEvent;
-import com.tyrengard.unbound.jobs.events.JobTaskPerformEvent;
-import com.tyrengard.unbound.jobs.events.TaskPerformEvent;
+import com.tyrengard.unbound.jobs.actions.BlockBased;
+import com.tyrengard.unbound.jobs.actions.EntityBased;
+import com.tyrengard.unbound.jobs.actions.ItemStackBased;
+import com.tyrengard.unbound.jobs.events.PlayerPerformJobQuestTaskEvent;
+import com.tyrengard.unbound.jobs.events.PlayerPerformJobTaskEvent;
+import com.tyrengard.unbound.jobs.events.PlayerPerformActionEvent;
 import com.tyrengard.unbound.jobs.exceptions.UnboundJobsException;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestInstance;
 import com.tyrengard.unbound.jobs.tasks.*;
@@ -14,6 +17,7 @@ import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.data.Ageable;
@@ -118,10 +122,10 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         switch (b.getType()) {
             case WHEAT, NETHER_WART, CARROTS, POTATOES, BEETROOTS, SUGAR_CANE -> {
                 if (b.getBlockData() instanceof Ageable a && a.getAge() == a.getMaximumAge()) {
-                    Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.HARVEST_BLOCK, e.getBlock()));
+                    Bukkit.getPluginManager().callEvent(new PlayerPerformActionEvent(p, Action.Default.HARVEST_PLANT, e.getBlock()));
                 }
             }
-            default -> Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.BREAK_BLOCK, e.getBlock()));
+            default -> Bukkit.getPluginManager().callEvent(new PlayerPerformActionEvent(p, Action.Default.BREAK_BLOCK, e.getBlock()));
         }
     }
 
@@ -130,38 +134,48 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         if (e.getBreeder() instanceof Player p) {
             if (worldsDisabled.contains(p.getWorld().getName()))
                 return;
-            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.BREED_ANIMAL, e.getEntity()));
+            Bukkit.getPluginManager().callEvent(new PlayerPerformActionEvent(p, Action.Default.BREED_ANIMAL, e.getEntity()));
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    private void onBrew(BrewEvent e) {
-        BrewerInventory bi = e.getContents();
-        BrewingStand bs = bi.getHolder();
-        if (bs == null) return;
-
-        if (worldsDisabled.contains(bs.getBlock().getWorld().getName()))
-            return;
-
-        Worker w = WorkerManager.getActiveWorker(bs);
-        if (w == null) return;
-
-        for (ItemStack i : InventoryUtils.getProductsOfBrewerInventory(bi)) {
-            if (i != null && i.getItemMeta() instanceof PotionMeta potionMeta && (potionMeta).getPersistentDataContainer()
-                    .get(UJ_PAID_KEY, PersistentDataType.BYTE) == null) {
-                Bukkit.getPluginManager().callEvent(new TaskPerformEvent(Bukkit.getPlayer(w.getId()), Action.Default.BREW_POTION, i));
-            }
-        }
-    }
+//    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+//    private void onBrew(BrewEvent e) {
+//        logDebug("TaskManager.onBrew: Handling BrewEvent");
+//
+//        BrewerInventory bi = e.getContents();
+//        BrewingStand bs = bi.getHolder();
+//        if (bs == null) return;
+//
+//        logDebug("TaskManager.onBrew: Checking if world is disabled");
+//        if (worldsDisabled.contains(bs.getBlock().getWorld().getName()))
+//            return;
+//
+//        logDebug("TaskManager.onBrew: Getting active worker");
+//        Worker w = WorkerManager.getActiveWorker(bs);
+//        if (w == null) return;
+//
+//        for (ItemStack i : InventoryUtils.getContentsOfPotionSlots(bi)) {
+//            if (i != null && i.getItemMeta() instanceof PotionMeta potionMeta && potionMeta.getPersistentDataContainer()
+//                    .get(UJ_PAID_KEY, PersistentDataType.BYTE) == null) {
+//                Bukkit.getPluginManager().callEvent(
+//                        new PlayerPerformActionEvent(Bukkit.getPlayer(w.getId()), Action.Default.BREW_POTION, i));
+//
+//                potionMeta.getPersistentDataContainer().set(UJ_PAID_KEY, PersistentDataType.BYTE, (byte) 1);
+//                i.setItemMeta(potionMeta);
+//            }
+//        }
+//
+//        WorkerManager.removeActiveWorker(bs.getBlock());
+//    }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onPlayerFish(PlayerFishEvent e) {
         if (worldsDisabled.contains(e.getPlayer().getWorld().getName()))
             return;
 
-        if (e.getCaught() instanceof Item caughtItem) {
-            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), Action.Default.CATCH_FISH, caughtItem));
-        }
+        if (e.getCaught() instanceof Item caughtItem)
+            Bukkit.getPluginManager().callEvent(
+                    new PlayerPerformActionEvent(e.getPlayer(), Action.Default.CATCH_FISH, caughtItem));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -169,7 +183,8 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         if (worldsDisabled.contains(e.getWhoClicked().getWorld().getName()))
             return;
 
-        Bukkit.getPluginManager().callEvent(new TaskPerformEvent((Player) e.getWhoClicked(), Action.Default.CRAFT_ITEM, e.getRecipe().getResult()));
+        Bukkit.getPluginManager().callEvent(
+                new PlayerPerformActionEvent((Player) e.getWhoClicked(), Action.Default.CRAFT_ITEM, e.getRecipe().getResult()));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -178,7 +193,8 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
             return;
 
         if (e.getHarvestedBlock().getBlockData() instanceof Ageable a && a.getAge() == a.getMaximumAge())
-            Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), Action.Default.HARVEST_BLOCK, e.getHarvestedBlock()));
+            Bukkit.getPluginManager().callEvent(
+                    new PlayerPerformActionEvent(e.getPlayer(), Action.Default.HARVEST_PLANT, e.getHarvestedBlock()));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -189,14 +205,23 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
         if (worldsDisabled.contains(p.getWorld().getName()))
             return;
 
-        Bukkit.getPluginManager().callEvent(new TaskPerformEvent(p, Action.Default.KILL_MOB, e.getEntity()));
+        Bukkit.getPluginManager().callEvent(
+                new PlayerPerformActionEvent(p, Action.Default.KILL_MOB, e.getEntity()));
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     private void onBlockPlace(BlockPlaceEvent e) {
-        if (worldsDisabled.contains(e.getPlayer().getWorld().getName()))
+        if (worldsDisabled.contains(e.getPlayer().getWorld().getName()) || !e.canBuild())
             return;
-        Bukkit.getPluginManager().callEvent(new TaskPerformEvent(e.getPlayer(), Action.Default.PLACE_BLOCK, e.getBlock()));
+
+        Block b = e.getBlockPlaced();
+
+        if (Tag.CROPS.isTagged(b.getType()) || Tag.SAPLINGS.isTagged(b.getType()))
+            Bukkit.getPluginManager().callEvent(
+                    new PlayerPerformActionEvent(e.getPlayer(), Action.Default.SOW_PLANT, b));
+        else
+            Bukkit.getPluginManager().callEvent(
+                    new PlayerPerformActionEvent(e.getPlayer(), Action.Default.PLACE_BLOCK, b));
     }
 
 //    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -217,15 +242,20 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
 //            }
 //        }
 //    }
+    // endregion
 
-    @EventHandler
-    private void onTaskPerform(TaskPerformEvent e) {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onTaskPerform(PlayerPerformActionEvent e) {
+        logDebug("TaskManager.onTaskPerform: Handling PlayerPerformActionEvent");
         Player p = e.getPlayer();
 
         Worker worker = WorkerManager.obtainWorker(p.getUniqueId());
 
         List<Job> jobs = worker.getJobs();
-        List<JobTask> jobTasks = jobs.stream().flatMap(job -> job.getJobTasks().stream()).collect(Collectors.toList());
+        List<JobTask> jobTasks = jobs.stream()
+                .flatMap(job -> job.getJobTasks().stream())
+                .filter(jobTask -> jobTask.getAction() == e.getAction())
+                .collect(Collectors.toList());
         List<JobQuestTask> jobQuestTasks = new ArrayList<>();
         for (Job job : jobs) {
             jobQuestTasks.addAll(worker.getJobQuestData(job).getAllInstances().stream()
@@ -254,11 +284,17 @@ public final class TaskManager extends AManager<UnboundJobs> implements Listener
             performedJobQuestTasks = jobQuestTasks.stream().filter(t -> t instanceof EntityBased eb && eb.acceptsEntity(entity)).collect(Collectors.toList());
         }
 
-        if (performedJobTask != null)
-            Bukkit.getPluginManager().callEvent(new JobTaskPerformEvent(worker, performedJobTask));
-        if (performedJobQuestTasks != null)
+        if (performedJobTask != null) {
+            logDebug("TaskManager.onTaskPerform: Found a performed job task");
+            JobData jobData = worker.getJobData(performedJobTask.getSource());
+            if (jobData != null)
+                Bukkit.getPluginManager().callEvent(new PlayerPerformJobTaskEvent(p, jobData.level(), performedJobTask));
+        }
+        if (performedJobQuestTasks != null) {
+            logDebug("TaskManager.onTaskPerform: Found a performed job quest task");
             for (JobQuestTask t : performedJobQuestTasks)
-                Bukkit.getPluginManager().callEvent(new JobQuestTaskPerformEvent(worker, t));
+                Bukkit.getPluginManager().callEvent(new PlayerPerformJobQuestTaskEvent(p, t));
+        }
     }
     //endregion
 }

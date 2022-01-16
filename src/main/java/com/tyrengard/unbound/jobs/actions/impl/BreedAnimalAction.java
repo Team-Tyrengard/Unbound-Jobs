@@ -1,10 +1,10 @@
-package com.tyrengard.unbound.jobs.tasks.impl;
+package com.tyrengard.unbound.jobs.actions.impl;
 
 import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.actions.Action;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
-import com.tyrengard.unbound.jobs.tasks.EntityBased;
+import com.tyrengard.unbound.jobs.quests.JobQuest;
+import com.tyrengard.unbound.jobs.actions.EntityBased;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.JobTask;
 import org.bukkit.entity.Entity;
@@ -13,7 +13,7 @@ import org.bukkit.entity.EntityType;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class BreedAnimalTask {
+public class BreedAnimalAction {
     public static class JOB_TASK extends JobTask.Base implements EntityBased {
         protected final Set<EntityType> entityTypes;
 

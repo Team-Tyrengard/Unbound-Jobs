@@ -2,6 +2,7 @@ package com.tyrengard.unbound.jobs.workers;
 
 import com.tyrengard.aureycore.foundation.ADataManager;
 import com.tyrengard.aureycore.foundation.Configured;
+import com.tyrengard.aureycore.foundation.common.events.PlayerStartBrewEvent;
 import com.tyrengard.aureycore.foundation.common.random.RandomSelector;
 import com.tyrengard.aureycore.foundation.common.struct.UUIDDataType;
 import com.tyrengard.aureycore.foundation.common.utils.BossBarUtils;
@@ -9,26 +10,34 @@ import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.JobData;
 import com.tyrengard.unbound.jobs.JobManager;
 import com.tyrengard.unbound.jobs.UnboundJobs;
-import com.tyrengard.unbound.jobs.events.JobLevelUpEvent;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.events.PlayerLevelUpJobEvent;
+import com.tyrengard.unbound.jobs.quests.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
+import com.tyrengard.unbound.jobs.quests.JobQuestType;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
 import com.tyrengard.unbound.jobs.workers.enums.ProfileVisibility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.BrewingStand;
+import org.bukkit.block.TileState;
 import org.bukkit.boss.BarColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.persistence.PersistentDataHolder;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -158,7 +167,7 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
         }
     }
 
-    public static void refreshQuests(Worker worker, JobQuestType jobQuestType) {
+    public static void refreshQuests(@NotNull Worker worker, @NotNull JobQuestType jobQuestType) {
         boolean daily = jobQuestType == JobQuestType.DAILY;
 
         for (Job job : worker.getJobs()) {
@@ -173,7 +182,8 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
         worker.setLastQuestRefreshDate(LocalDate.now());
     }
 
-    public static void giveJobExperience(Worker worker, Job job, int exp) {
+    public static void giveJobExperience(@NotNull Player player, @NotNull Job job, int exp) {
+        Worker worker = obtainWorker(player.getUniqueId());
         JobData jobData = worker.getJobData(job);
         if (jobData == null)
             return;
@@ -186,9 +196,9 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
             boolean shouldPresent = false;
 
             if (expToLevelUp <= newExp) { // level up
-                JobLevelUpEvent jobLevelUpEvent = new JobLevelUpEvent(worker, job, nextLevel);
-                Bukkit.getPluginManager().callEvent(jobLevelUpEvent);
-                if (!jobLevelUpEvent.isCancelled()) {
+                PlayerLevelUpJobEvent playerLevelUpJobEvent = new PlayerLevelUpJobEvent(player, job, nextLevel);
+                Bukkit.getPluginManager().callEvent(playerLevelUpJobEvent);
+                if (!playerLevelUpJobEvent.isCancelled()) {
                     if (nextLevel == maxLevel) newExp = 0;
                     else newExp -= expToLevelUp;
                     JobData newJobData = new JobData(nextLevel, newExp);
@@ -212,9 +222,30 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
         }
     }
 
-    public static Worker getActiveWorker(PersistentDataHolder pdh) {
-        UUID id = pdh.getPersistentDataContainer().get(UJ_ACTIVE_WORKER_KEY, new UUIDDataType());
+    public static @Nullable Worker getActiveWorker(@NotNull PersistentDataHolder pdh) {
+        UUID id = pdh.getPersistentDataContainer().get(UJ_ACTIVE_WORKER_KEY, UUIDDataType.instance);
         return id == null ? null : WorkerManager.obtainWorker(id);
+    }
+
+    public static void setActiveWorker(@NotNull Block block, @NotNull Worker worker) {
+        if (block.getState() instanceof TileState ts) {
+            ts.getPersistentDataContainer().set(UJ_ACTIVE_WORKER_KEY, UUIDDataType.instance, worker.getId());
+            ts.update();
+            instance.logDebug("WorkerManager.setActiveWorker: Set active worker for " + block.getType() + " at " +
+                    block.getLocation() + " to " + worker.getId());
+        } else {
+            instance.logDebug("WorkerManager.setActiveWorker: Block at " + block.getLocation() + " has no PersistentDataContainer.");
+        }
+    }
+
+    public static void removeActiveWorker(@NotNull Block block) {
+        if (block.getState() instanceof TileState ts) {
+            ts.getPersistentDataContainer().remove(UJ_ACTIVE_WORKER_KEY);
+            ts.update();
+            instance.logDebug("WorkerManager.removeActiveWorker: Removed active worker for " + ts.getBlock().getType());
+        } else {
+            instance.logDebug("WorkerManager.removeActiveWorker: Block at " + block.getLocation() + " has no PersistentDataContainer.");
+        }
     }
     // endregion
     // region Event listeners
@@ -238,9 +269,57 @@ public class WorkerManager extends ADataManager<UnboundJobs, Worker, UUID> imple
         }
         // endregion
     }
-    // endregion
 
-    private static void presentExpBar(Worker w, Job j) {
+    // Block ownership check for opening inventories
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    private void onInventoryOpen(InventoryOpenEvent e) {
+        HumanEntity p = e.getPlayer();
+        Inventory inv = e.getInventory();
+
+        if (inv.getHolder() instanceof PersistentDataHolder pdh) {
+            Worker activeWorker = WorkerManager.getActiveWorker(pdh);
+            if (activeWorker != null && !activeWorker.getId().equals(p.getUniqueId())) {
+                p.sendMessage(ChatColor.RED + "Someone else is using that.");
+                e.setCancelled(true);
+            }
+        }
+    }
+
+//    // Block ownership establishment for furnaces and brewing stands
+//    @EventHandler(priority = EventPriority.HIGHEST)
+//    private void onInventoryClose(InventoryCloseEvent e) {
+//        Worker worker = obtainWorker(e.getPlayer().getUniqueId());
+//        Inventory inv = e.getInventory();
+//
+//        // TODO: make sure that other people can't "steal" ownership by closing inventory first before owner
+//        if (inv instanceof BrewerInventory brewerInventory) {
+//            BrewingStand bs = brewerInventory.getHolder();
+//            if (bs == null) // floating inv
+//                return;
+//
+//            if (WorkerManager.getActiveWorker(bs) != null) // already owned
+//                return;
+//
+//            if (bs.getBrewingTime() > 0) // unowned, started by closer
+//                WorkerManager.setActiveWorker(bs, worker);
+//        }
+//    }
+
+    // Block ownership establishment for brewing stands
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onPlayerStartBrew(PlayerStartBrewEvent e) {
+        Worker worker = obtainWorker(e.getPlayer().getUniqueId());
+        BrewingStand bs = e.getBrewingStand();
+        if (bs == null) // floating inv
+            return;
+
+        if (WorkerManager.getActiveWorker(bs) != null) // already owned
+            return;
+
+        WorkerManager.setActiveWorker(e.getBrewingStandBlock(), worker);
+    }
+
+    private static void presentExpBar(@NotNull Worker w, @NotNull Job j) {
         JobData jobData = w.getJobData(j);
         if (jobData == null)
             return;

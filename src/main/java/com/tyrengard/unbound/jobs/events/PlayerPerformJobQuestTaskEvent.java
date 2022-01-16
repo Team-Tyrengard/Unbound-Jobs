@@ -2,11 +2,13 @@ package com.tyrengard.unbound.jobs.events;
 
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.workers.Worker;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class JobQuestTaskPerformEvent extends Event {
+public class PlayerPerformJobQuestTaskEvent extends PlayerEvent {
     // region Base event components
     private static final HandlerList handlers = new HandlerList();
 
@@ -19,16 +21,11 @@ public class JobQuestTaskPerformEvent extends Event {
     }
     // endregion
 
-    private final Worker worker;
     private final JobQuestTask task;
 
-    public JobQuestTaskPerformEvent(Worker worker, JobQuestTask task) {
-        this.worker = worker;
+    public PlayerPerformJobQuestTaskEvent(Player who, JobQuestTask task) {
+        super(who);
         this.task = task;
-    }
-
-    public Worker getWorker() {
-        return worker;
     }
 
     public JobQuestTask getTask() {

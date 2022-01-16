@@ -1,11 +1,9 @@
-package com.tyrengard.unbound.jobs.quests.internal;
+package com.tyrengard.unbound.jobs.quests;
 
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.JobManager;
 import com.tyrengard.unbound.jobs.TaskManager;
 import com.tyrengard.unbound.jobs.actions.Action;
-import com.tyrengard.unbound.jobs.quests.JobQuestReward;
-import com.tyrengard.unbound.jobs.quests.JobQuestRewardType;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import com.tyrengard.unbound.jobs.tasks.TaskSource;
 import org.bukkit.configuration.ConfigurationSection;

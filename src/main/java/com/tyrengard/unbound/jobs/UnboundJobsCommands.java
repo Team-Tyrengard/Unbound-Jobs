@@ -1,6 +1,6 @@
 package com.tyrengard.unbound.jobs;
 
-import com.tyrengard.aureycore.customguis.CustomGUIManager;
+import com.tyrengard.aureycore.guis.CustomGUIManager;
 import com.tyrengard.aureycore.foundation.ACommandExecutor;
 import com.tyrengard.aureycore.foundation.CommandDeclaration;
 import com.tyrengard.aureycore.foundation.common.stringformat.ChatFormat;
@@ -9,7 +9,7 @@ import com.tyrengard.aureycore.foundation.common.utils.StringUtils;
 import com.tyrengard.unbound.jobs.gui.JobListGUI;
 import com.tyrengard.unbound.jobs.gui.JobProfileGUI;
 import com.tyrengard.unbound.jobs.gui.JobProfileTab;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuestType;
+import com.tyrengard.unbound.jobs.quests.JobQuestType;
 import com.tyrengard.unbound.jobs.workers.Worker;
 import com.tyrengard.unbound.jobs.workers.WorkerManager;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
@@ -72,8 +72,8 @@ public class UnboundJobsCommands extends ACommandExecutor {
         // /unbound-jobs-admin reload
         addRegularCommand(new CommandDeclaration<>(false, adminBaseCommandString,
                 "reload", "Reload all UnboundJobs configs", new String[0], (sender, args) -> {
+            sender.sendMessage("[Unbound Jobs] Reloading plugin...");
             UnboundJobs.getInstance().reloadPlugin();
-            sender.sendMessage("Unbound Jobs reloaded.");
             return true;
         }));
 
@@ -83,9 +83,10 @@ public class UnboundJobsCommands extends ACommandExecutor {
 
         // /unbound-jobs-admin jobs reload
         addRegularCommand(new CommandDeclaration<>(false, adminBaseCommandString,
-                "jobs reload", "Reload UnboundJobs job configs", new String[0], (sender, args) -> {
+                "jobs reload", "Reload jobs", new String[0], (sender, args) -> {
+            sender.sendMessage("[Unbound Jobs] Reloading jobs...");
             JobManager.loadJobConfigFiles();
-            sender.sendMessage("Unbound Jobs job configs reloaded.");
+            sender.sendMessage("[Unbound Jobs] Jobs reloaded.");
             return true;
         }));
 

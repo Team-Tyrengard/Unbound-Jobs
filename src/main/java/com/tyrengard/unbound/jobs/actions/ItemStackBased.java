@@ -1,4 +1,4 @@
-package com.tyrengard.unbound.jobs.tasks;
+package com.tyrengard.unbound.jobs.actions;
 
 import org.bukkit.inventory.ItemStack;
 

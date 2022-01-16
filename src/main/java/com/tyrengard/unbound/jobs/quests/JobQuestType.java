@@ -1,4 +1,4 @@
-package com.tyrengard.unbound.jobs.quests.internal;
+package com.tyrengard.unbound.jobs.quests;
 
 public enum JobQuestType {
     DAILY,

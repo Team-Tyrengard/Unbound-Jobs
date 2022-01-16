@@ -1,7 +1,7 @@
 package com.tyrengard.unbound.jobs.tasks;
 
 import com.tyrengard.unbound.jobs.actions.Action;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.quests.JobQuest;
 
 public interface JobQuestTask extends Task<JobQuest> {
     int getId();

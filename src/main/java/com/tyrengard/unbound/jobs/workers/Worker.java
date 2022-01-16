@@ -3,7 +3,7 @@ package com.tyrengard.unbound.jobs.workers;
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.JobData;
 import com.tyrengard.unbound.jobs.JobManager;
-import com.tyrengard.unbound.jobs.quests.internal.JobQuest;
+import com.tyrengard.unbound.jobs.quests.JobQuest;
 import com.tyrengard.unbound.jobs.quests.internal.JobQuestData;
 import com.tyrengard.unbound.jobs.workers.enums.BossBarExpIndicatorSetting;
 import com.tyrengard.unbound.jobs.workers.enums.ProfileVisibility;
@@ -11,7 +11,6 @@ import dev.morphia.annotations.AlsoLoad;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import org.bukkit.Bukkit;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,11 +60,11 @@ public final class Worker {
         return getJobDataMap().keySet().stream().map(JobManager::getJob).filter(Objects::nonNull).toList();
     }
 
-    public @Nullable JobData getJobData(Job j) {
+    public @Nullable JobData getJobData(@NotNull Job j) {
         return getJobDataMap().get(j.getId());
     }
 
-    public void setJobData(Job j, JobData jd) {
+    public void setJobData(@NotNull Job j, @NotNull JobData jd) {
         getJobDataMap().put(j.getId(), jd);
     }
 
@@ -73,7 +72,7 @@ public final class Worker {
         return getJobDataMap().containsKey(j.getId());
     }
 
-    public void removeJob(Job j) {
+    public void removeJob(@NotNull Job j) {
         getJobDataMap().remove(j.getId());
     }
 

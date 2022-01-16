@@ -1,5 +1,7 @@
 package com.tyrengard.unbound.jobs.quests.internal;
 
+import com.tyrengard.unbound.jobs.quests.JobQuest;
+import com.tyrengard.unbound.jobs.quests.JobQuestType;
 import com.tyrengard.unbound.jobs.tasks.JobQuestTask;
 import dev.morphia.annotations.Entity;
 import org.jetbrains.annotations.Nullable;

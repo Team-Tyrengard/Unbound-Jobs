@@ -1,7 +1,7 @@
-//package com.tyrengard.unbound.jobs.tasks.impl;
+//package com.tyrengard.unbound.jobs.actions.impl;
 //
 //import com.tyrengard.unbound.jobs.Job;
-//import com.tyrengard.unbound.jobs.tasks.ItemStackBased;
+//import com.tyrengard.unbound.jobs.actions.ItemStackBased;
 //import com.tyrengard.unbound.jobs.tasks.Task;
 //import org.bukkit.Material;
 //import org.bukkit.inventory.ItemStack;

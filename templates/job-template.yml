@@ -100,7 +100,7 @@ tasks:
   # <base exp> must be a number (decimals NOT allowed)
   #
   # Default supported actions are:
-  #     break_block, breed_animal, brew_potion, catch_fish, craft_item, gather_from_animal,
+  #     break_block, breed_animal, catch_fish, craft_item, gather_from_animal,
   #     harvest_plant, kill_mob, place_block, repair_item, smelt_item, sow_plant
   #
   # NOTE: Custom tasks can be declared by other plugins that extend Unbound Jobs.

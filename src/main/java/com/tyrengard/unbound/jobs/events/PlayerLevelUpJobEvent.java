@@ -2,12 +2,14 @@ package com.tyrengard.unbound.jobs.events;
 
 import com.tyrengard.unbound.jobs.Job;
 import com.tyrengard.unbound.jobs.workers.Worker;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class JobLevelUpEvent extends Event implements Cancellable {
+public class PlayerLevelUpJobEvent extends PlayerEvent implements Cancellable {
     // region Base event components
     private static final HandlerList handlers = new HandlerList();
     @Override
@@ -29,18 +31,13 @@ public class JobLevelUpEvent extends Event implements Cancellable {
     }
     // endregion
 
-    private final Worker worker;
     private final Job job;
     private final short newLevel;
 
-    public JobLevelUpEvent(Worker worker, Job job, short newLevel) {
-        this.worker = worker;
+    public PlayerLevelUpJobEvent(Player who, Job job, short newLevel) {
+        super(who);
         this.job = job;
         this.newLevel = newLevel;
-    }
-
-    public Worker getWorker() {
-        return worker;
     }
 
     public Job getJob() {
